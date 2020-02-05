@@ -6,7 +6,6 @@ application:
       server_os: win2k16
       server_cpu: 2
     front:
-      server_cpu: 3
       server_memory: 4096
 
   locations:
@@ -28,3 +27,6 @@ environments:
       win_1:
         server_location: france
         server_role: front
+      win_2:
+        server_location: france
+        server_role: back
