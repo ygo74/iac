@@ -1,0 +1,9 @@
+---
+application:
+  roles:
+  locations:
+environments:
+  dev:
+    roles:
+    locations:
+    servers:

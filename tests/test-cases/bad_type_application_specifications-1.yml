@@ -1,0 +1,30 @@
+---
+application:
+  roles:
+    # type specification
+    default:
+      server_os: win2k16
+      server_cpu: 2
+    # Only for unit tests : attributes at this level must be hashtable
+    unexpected_attributes:
+    unexpected_attributes_2: 1
+  locations:
+    # type specification
+    france:
+      server_subnet: 192.168.1.0/24
+
+environments:
+  dev:
+    roles:
+      # type specification
+      default:
+        server_memory: 4096
+    locations:
+      # type specification
+      france:
+        server_subnet: 192.168.2.0/24
+    servers:
+      # type specification
+      win_1:
+        server_location: france
+        server_role: front
