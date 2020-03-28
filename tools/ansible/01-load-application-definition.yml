@@ -1,0 +1,10 @@
+---
+# -----------------------------------------------------------------------------
+# Load application definition
+# -----------------------------------------------------------------------------
+- name: Load application definition
+  hosts: localhost
+  connection: local
+
+  tasks:
+    - debug: var=hostvars[inventory_hostname]
