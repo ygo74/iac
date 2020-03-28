@@ -9,7 +9,7 @@ trigger:
     - /**/*.md
 
 jobs:
-- job: Verify ansible tools
+- job: VerifyAnsibleTools
   pool:
     vmImage: 'Ubuntu-16.04'
 
