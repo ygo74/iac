@@ -42,9 +42,9 @@ jobs:
   - task: Bash@3
     inputs:
         targetType: 'inline'
-        workingDirectory: roles/windows_authorization
+        workingDirectory: tools/ansible/
         script: |
-          find tools/ansible/ -type f -not -path '*/\.*' -exec grep -Il '.' {} \; | xargs -d '\n' -L 1 dos2unix -k
+          find . -type f -not -path '*/\.*' -exec grep -Il '.' {} \; | xargs -d '\n' -L 1 dos2unix -k
     displayName: 'Convert files dos2unix'
 
 
