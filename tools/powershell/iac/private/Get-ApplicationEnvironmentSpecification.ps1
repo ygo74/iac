@@ -23,6 +23,8 @@ function Get-ApplicationEnvironmentSpecification
     write-verbose "1. Load $server $serverKey attributes"
     $server = $environment.servers[$serverKey].Clone()
     $server.Add("server_name", $serverKey)
+    $server.Add("server_environment", $environmentName)
+
 
     # 2. Load location specification defined for the environment
     if (($null -ne $server.server_location) -and `
