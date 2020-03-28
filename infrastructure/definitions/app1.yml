@@ -1,0 +1,152 @@
+---
+# ----------------------------------------------------------------------------
+# Application samples :
+# - 4 front-ends web dans une dmz dédiée
+# - 2 back-ends pour la partie lecture dans une dmz dédiée
+# - 2 back-ends pour la partie écriture dans une dmz dédiée
+# - 2 database servers dans une dmz dédié
+#
+# En environnement de dév : le nombre de serveurs est moindre et tous dans la même DMZ
+# En prod : il y a trois régions différentes
+# En Asie : moins de serveurs front-end car moins de clients
+# Aux US, plus d'acheteurs,, les back-ends d'écriture doivent êtres pluys costaud
+# ----------------------------------------------------------------------------
+application:
+  roles:
+    # type specification
+    default:
+      server_os: win2k16
+      server_disk:
+        - drive_letter: 'c:'
+          capacity:     100
+        - drive_letter: 'd:'
+          capacity:     100
+
+    front_web:
+      server_cpu:    4
+      server_memory: 4096
+
+    read_api:
+      server_cpu:    8
+      server_memory: 8192
+
+    write_api:
+      server_cpu:    8
+      server_memory: 8192
+      server_os:     win2k19
+
+    database:
+      server_cpu:    8
+      server_memory: 16384
+      server_disk:
+        - drive_letter: 'c:'
+          capacity:     100
+        - drive_letter: 'd:'
+          capacity:     1000
+        - drive_letter: 'e:'
+          capacity:     1000
+
+  locations:
+    # type specification
+    europe:
+      roles:
+        front_web:
+          server_subnet: 192.168.1.0/24
+        read_api:
+          server_subnet: 192.168.2.0/24
+        write_api:
+          server_subnet: 192.168.3.0/24
+        database:
+          server_subnet: 192.168.4.0/24
+
+    us:
+      roles:
+        front_web:
+          server_subnet: 192.169.1.0/24
+        read_api:
+          server_subnet: 192.169.2.0/24
+        write_api:
+          server_subnet: 192.169.3.0/24
+        database:
+          server_subnet: 192.169.4.0/24
+
+    asia:
+      roles:
+        front_web:
+          server_subnet: 192.170.1.0/24
+        read_api:
+          server_subnet: 192.170.2.0/24
+        write_api:
+          server_subnet: 192.170.3.0/24
+        database:
+          server_subnet: 192.170.4.0/24
+
+environments:
+  dev:
+    roles:
+      # type specification
+      default:
+        server_cpu:    4
+        server_memory: 4096
+    locations:
+      # type specification
+      europe:
+        roles:
+          default:
+            server_subnet: 192.160.1.0/24
+
+    servers:
+      # type specification
+      front_dev_1:
+        server_location: europe
+        server_role:     front_web
+      read_dev_1:
+        server_location: europe
+        server_role:     read_api
+      write_dev_1:
+        server_location: europe
+        server_role:     write_api
+      database_dev_1:
+        server_location: europe
+        server_role:     database
+
+  uat:
+    locations:
+      # type specification
+      europe:
+        roles:
+          front_web:
+            server_subnet: 192.161.1.0/24
+          read_api:
+            server_subnet: 192.161.2.0/24
+          write_api:
+            server_subnet: 192.161.3.0/24
+          database:
+            server_subnet: 192.161.4.0/24
+
+    servers:
+      # type specification
+      front_uat_1:
+        server_location: europe
+        server_role:     front_web
+      front_uat_2:
+        server_location: europe
+        server_role:     front_web
+      read_uat_1:
+        server_location: europe
+        server_role:     read_api
+      read_uat_2:
+        server_location: europe
+        server_role:     read_api
+      write_uat_1:
+        server_location: europe
+        server_role:     write_api
+      write_uat_2:
+        server_location: europe
+        server_role:     write_api
+      database_uat_1:
+        server_location: europe
+        server_role:     database
+      database_uat_2:
+        server_location: europe
+        server_role:     database

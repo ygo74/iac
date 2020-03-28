@@ -43,5 +43,5 @@ jobs:
         targetType: 'inline'
         workingDirectory: tools/ansible
         script: |
-          ansible-playbook 01-load-application-definition.yml
+          ansible-playbook 01-load-application-definition.yml -e application=app1
     displayName: 'Execute ansible'
