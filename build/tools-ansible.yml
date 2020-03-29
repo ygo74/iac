@@ -52,18 +52,18 @@ jobs:
   - task: Bash@3
     inputs:
         targetType: 'inline'
-        workingDirectory: .
+        workingDirectory: tools/ansible
         script: |
           source my_env/bin/activate
-          yamllint tools/ansible/
+          yamllint .
     displayName: 'Yaml lint'
 
   # ansible lint ansible code
   - task: Bash@3
     inputs:
         targetType: 'inline'
-        workingDirectory: .
+        workingDirectory: tools/ansible
         script: |
           source my_env/bin/activate
-          ansible-lint tools/ansible/
+          ansible-lint .
     displayName: 'Ansible lint'
