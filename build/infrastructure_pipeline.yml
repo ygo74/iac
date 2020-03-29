@@ -76,6 +76,6 @@ jobs:
           git add infrastructure/generated
           git status
           git commit -m "Automatic Generated servers [skip ci]"
-         # git push origin HEAD:<name-of-remote-branch>
+          git push
     displayName: 'Commit application server generations'
     condition:   and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
