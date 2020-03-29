@@ -16,6 +16,11 @@ jobs:
 
   steps:
 
+  # Checkout the repository and keep git credential
+  - checkout: self
+    submodules: true
+    persistCredentials: true
+
   - task: Bash@3
     inputs:
         targetType: 'inline'
