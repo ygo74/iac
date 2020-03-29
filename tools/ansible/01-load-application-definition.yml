@@ -9,6 +9,17 @@
   vars:
     application_definition_path: '../../infrastructure/definitions/{{ application }}.yml'
 
+
+    # application definition roles
+    application_definition_roles: '{{ application_definition.application.roles }}'
+
+    # default application definition
+    application_definition_role_default: >-
+      {{ application_definition_roles.default | default({}) }}
+
+    # application definition locations
+    application_definition_locations: '{{ application_definition.application.locations }}'
+
   tasks:
 
     # -----------------------------------------------------------------------------
@@ -40,6 +51,8 @@
           include_vars:
             file: '{{ application_definition_path }}'
             name: application_definition
+          tags:
+            - always
 
         # Check default structure
         - name: Check default structure
@@ -58,12 +71,43 @@
           assert:
               that:
                 - item.value.servers is defined
-                - item.value.servers.keys() | length > 0
+                - item.value.servers | length > 0
               fail_msg: "Missing servers defintions in environment {{ item.key }}"
           loop: '{{ application_definition.environments | dict2items }}'
 
     # -----------------------------------------------------------------------------
     # Create the definition for each server
     # -----------------------------------------------------------------------------
-    - debug:
-        var: application_definition
+    - name: Create the definition for each server
+      block:
+        - name: Select servers
+          set_fact:
+            application_servers_selected: "{{ application_servers_selected |
+                                              default({}) |
+                                              combine(my_servers)
+                                          }}"
+          loop: "{{ application_definition.environments |
+                    dict2items | json_query('[*].{key: key, value: value.servers}')
+                 }}"
+          vars:
+            my_env: '{{ item.key }}'
+            my_servers: >-
+              {%- set servers={} -%}
+              {%- for server_name, server in item.value.iteritems() -%}
+                {%- do servers.update( {server_name: server
+                                        | combine({ "server_environment": item.key })
+                                        | combine(application_definition_role_default)
+                                        | combine( application_definition_roles[server.server_role] | default({}))
+                                       }
+                                     )
+                -%}
+              {%- endfor -%}
+              {{ servers }}
+
+
+
+        - debug:
+            var: application_servers_selected
+
+      tags:
+        - test

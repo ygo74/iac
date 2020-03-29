@@ -43,5 +43,6 @@ jobs:
         targetType: 'inline'
         workingDirectory: tools/ansible
         script: |
-          ansible-playbook 01-load-application-definition.yml -e application=app1
+          source ../../my_env/bin/activate
+          ansible-playbook 00-generate-application-servers -e application=app1
     displayName: 'Execute ansible'
