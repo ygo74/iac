@@ -17,14 +17,15 @@ jobs:
   steps:
 
   # Checkout the repository and keep git credential
-  - checkout: self
-    submodules: true
+  - checkout:           self
+    clean:              true
+    submodules:         true
     persistCredentials: true
 
   - task: Bash@3
     inputs:
-        targetType: 'inline'
-        workingDirectory: tools/ansible
+        targetType:       'inline'
+        workingDirectory: 'tools/ansible'
         script: |
           export
     displayName: 'Export variables'
@@ -32,7 +33,7 @@ jobs:
 
   - task: UsePythonVersion@0
     inputs:
-        versionSpec: '2.7'
+        versionSpec:  '2.7'
         architecture: 'x64'
 
   # - task: AzureKeyVault@1
@@ -55,18 +56,18 @@ jobs:
 
   - task: Bash@3
     inputs:
-        targetType: 'inline'
-        workingDirectory: tools/ansible
+        targetType:       'inline'
+        workingDirectory: 'tools/ansible'
         script: |
           source ../../ansible-2.9.6/bin/activate
           ansible-playbook 00-generate-application-servers.yml -e application=app1
     displayName: 'Execute ansible'
-    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+    condition:   and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
 
   - task: Bash@3
     inputs:
-        targetType: 'inline'
-        workingDirectory: .
+        targetType:       'inline'
+        workingDirectory: '.'
         script: |
           git config --global user.email "you@example.com"
           git config --global user.name "Your Name"
@@ -74,5 +75,6 @@ jobs:
           git add infrastructure/generated
           git status
           git commit -m "Automatic Generated servers [skip ci]"
+          git push
     displayName: 'Commit application server generations'
-    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+    condition:   and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
