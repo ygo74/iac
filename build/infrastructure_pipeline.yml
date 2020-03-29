@@ -11,48 +11,54 @@ trigger:
     - /**/*.md
 
 jobs:
+
 - job: IdentifyApplications
   pool:
     vmImage: 'Ubuntu-16.04'
 
   steps:
 
-  - task: Bash@3
-    inputs:
-        targetType:       'inline'
-        workingDirectory: 'tools/ansible'
-        script: |
-          git diff-tree --no-commit-id --name-only -r $BUILD_SOURCEVERSION
-          modifications=$(git diff-tree --no-commit-id --name-only -r $BUILD_SOURCEVERSION)
+    - task: Bash@3
+      inputs:
+          targetType:       'inline'
+          workingDirectory: 'tools/ansible'
+          script: |
+            echo "***************************************************************"
+            export
+            echo "***************************************************************"
+            echo "***************************************************************"
 
-          echo "***************************************************************"
-          echo "modifications : $modifications"
-          echo "***************************************************************"
-          for file in $modifications
-          do
-            echo "Found file : $file"
-            directory=($dirname "$file")
-            if [[ $directory == *"infrastructure/definitions"* ]]; then
-              application_name=$(basename $file .yml)
-              echo "Found application definition : $application_name"
-              applications=$applications,"'$application_name':{'application_name':'$application_name'}"
+            git diff-tree --no-commit-id --name-only -r $BUILD_SOURCEVERSION
+            modifications=$(git diff-tree --no-commit-id --name-only -r $BUILD_SOURCEVERSION)
+
+            echo "***************************************************************"
+            echo "modifications : $modifications"
+            echo "***************************************************************"
+            for file in $modifications
+            do
+              echo "Found file : $file"
+              directory=($dirname "$file")
+              if [[ $directory == *"infrastructure/definitions"* ]]; then
+                application_name=$(basename $file .yml)
+                echo "Found application definition : $application_name"
+                applications=$applications,"'$application_name':{'application_name':'$application_name'}"
+              fi
+            done
+
+            if [[ -z "$applications" ]]; then
+              echo "No application definiton modified"
+              exit 1
+            else
+              applications=${applications:1}
+              applications={$applications}
+              echo "Matrix variables : $applications"
+              echo "##vso[task.setvariable variable=applications;isOutput=true]$applications"
             fi
-          done
 
-          if [[ -z "$applications" ]]; then
-            echo "No application definiton modified"
-            exit 1
-          else
-            applications=${applications:1}
-            applications={$applications}
-            echo "Matrix variables : $applications"
-            echo "##vso[task.setvariable variable=applications;]$applications"
-          fi
-
-          echo "***************************************************************"
-          export
-    name:        'GetMatrixVariables'
-    displayName: 'Export variables'
+            echo "***************************************************************"
+            export
+      name:        'GetMatrixVariables'
+      displayName: 'Export variables'
 
 
 - job: BuildInfrastructure
@@ -63,62 +69,62 @@ jobs:
     matrix: $[ dependencies.IdentifyApplications.outputs['GetMatrixVariables.applications'] ]
   steps:
 
-  # Checkout the repository and keep git credential
-  - checkout:           self
-    clean:              true
-    submodules:         true
-    persistCredentials: true
+    # Checkout the repository and keep git credential
+    - checkout:           self
+      clean:              true
+      submodules:         true
+      persistCredentials: true
 
-  - task: UsePythonVersion@0
-    inputs:
-        versionSpec:  '2.7'
-        architecture: 'x64'
+    - task: UsePythonVersion@0
+      inputs:
+          versionSpec:  '2.7'
+          architecture: 'x64'
 
-  # - task: AzureKeyVault@1
-  #   inputs:
-  #     azureSubscription: 'Visual Studio Enterprise (62177529-73f0-4e11-a584-5d3526dc6999)'
-  #     keyVaultName:  'mesfVault'
-  #     secretsFilter: 'Ansible-Automation'
+    # - task: AzureKeyVault@1
+    #   inputs:
+    #     azureSubscription: 'Visual Studio Enterprise (62177529-73f0-4e11-a584-5d3526dc6999)'
+    #     keyVaultName:  'mesfVault'
+    #     secretsFilter: 'Ansible-Automation'
 
-  - task: Bash@3
-    inputs:
-        targetType: 'inline'
-        script: |
-          python -m pip install --upgrade pip setuptools wheel
-          python -m pip install virtualenv
-          python -m virtualenv ansible-2.9.6
-          source ansible-2.9.6/bin/activate
-          python -m pip install -r tools/ansible/venv_requirements.txt
-          sudo apt-get install dos2unix
-    displayName: 'Install tools'
+    - task: Bash@3
+      inputs:
+          targetType: 'inline'
+          script: |
+            python -m pip install --upgrade pip setuptools wheel
+            python -m pip install virtualenv
+            python -m virtualenv ansible-2.9.6
+            source ansible-2.9.6/bin/activate
+            python -m pip install -r tools/ansible/venv_requirements.txt
+            sudo apt-get install dos2unix
+      displayName: 'Install tools'
 
-  - task: Bash@3
-    inputs:
-        targetType:       'inline'
-        workingDirectory: 'tools/ansible'
-        script: |
-          source ../../ansible-2.9.6/bin/activate
-          ansible-playbook 00-generate-application-servers.yml -e application=$(application_name)
-    displayName: 'Execute ansible'
-    condition:   and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+    - task: Bash@3
+      inputs:
+          targetType:       'inline'
+          workingDirectory: 'tools/ansible'
+          script: |
+            source ../../ansible-2.9.6/bin/activate
+            ansible-playbook 00-generate-application-servers.yml -e application=$(application_name)
+      displayName: 'Execute ansible'
+      condition:   and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
 
-  - task: Bash@3
-    inputs:
-        targetType:       'inline'
-        workingDirectory: '.'
-        script: |
-          git config --global user.email "you@example.com"
-          git config --global user.name "Your Name"
-          branch_name=$(echo "$BUILD_SOURCEBRANCH" | sed "s/refs\/heads\///")
-          echo "***************************************************************"
-          echo "Current branch : $branch_name"
-          echo "***************************************************************"
+    - task: Bash@3
+      inputs:
+          targetType:       'inline'
+          workingDirectory: '.'
+          script: |
+            git config --global user.email "you@example.com"
+            git config --global user.name "Your Name"
+            branch_name=$(echo "$BUILD_SOURCEBRANCH" | sed "s/refs\/heads\///")
+            echo "***************************************************************"
+            echo "Current branch : $branch_name"
+            echo "***************************************************************"
 
-          git checkout -b $branch_name
-          git ls-files infrastructure/generated -o --exclude-standard | xargs -i git add '{}'
-          git add infrastructure/generated
-          git status
-          git commit -m "Automatic Generated servers [skip ci]"
-          git push --set-upstream origin $branch_name
-    displayName: 'Commit application server generations'
-    condition:   and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+            git checkout -b $branch_name
+            git ls-files infrastructure/generated -o --exclude-standard | xargs -i git add '{}'
+            git add infrastructure/generated
+            git status
+            git commit -m "Automatic Generated servers [skip ci]"
+            git push --set-upstream origin $branch_name
+      displayName: 'Commit application server generations'
+      condition:   and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
