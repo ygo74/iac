@@ -78,8 +78,12 @@ jobs:
             echo "***************************************************************"
             echo "***************************************************************"
 
-            git diff-tree --no-commit-id --name-only -r $BUILD_SOURCEVERSION
-            modifications=$(git diff-tree --no-commit-id --name-only -r $BUILD_SOURCEVERSION)
+            # git diff-tree --no-commit-id --name-only -r $BUILD_SOURCEVERSION
+            branch_name=$(echo "$BUILD_SOURCEBRANCH" | sed "s/refs\/heads\///")
+            git diff --name-only origin/master $branch_name
+
+            # modifications=$(git diff-tree --no-commit-id --name-only -r $BUILD_SOURCEVERSION)
+            modifications=$(git diff --name-only origin/master $branch_name)
 
             echo "***************************************************************"
             echo "modifications : $modifications"
@@ -176,6 +180,8 @@ jobs:
             echo "***************************************************************"
 
             git checkout -b $branch_name
+            git branch --set-upstream-to=origin/$branch_name infra/app1
+
             git ls-files infrastructure/generated -o --exclude-standard | xargs -i git add '{}'
             git add infrastructure/generated
             git status
