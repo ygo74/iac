@@ -27,7 +27,14 @@ jobs:
         targetType:       'inline'
         workingDirectory: 'tools/ansible'
         script: |
+          git diff-tree --no-commit-id --name-only -r $BUILD_SOURCEVERSION
+          $modifications=$(git diff-tree --no-commit-id --name-only -r $BUILD_SOURCEVERSION)
+
+          echo "***************************************************************"
+          echo "***************************************************************"
+          echo "***************************************************************"
           export
+
     displayName: 'Export variables'
 
 
@@ -71,15 +78,16 @@ jobs:
         script: |
           git config --global user.email "you@example.com"
           git config --global user.name "Your Name"
+          branch_name=$(echo "$BUILD_SOURCEBRANCH" | sed "s/refs\/heads\///")
           echo "***************************************************************"
-          echo "Current branch : $(echo "$BUILD_SOURCEBRANCH" | sed "s/refs\/heads\///")"
+          echo "Current branch : $branch_name"
           echo "***************************************************************"
 
-          git checkout -b infra/app1
+          git checkout -b $branch_name
           git ls-files infrastructure/generated -o --exclude-standard | xargs -i git add '{}'
           git add infrastructure/generated
           git status
           git commit -m "Automatic Generated servers [skip ci]"
-          git push --set-upstream origin infra/app1
+          git push --set-upstream origin $branch_name
     displayName: 'Commit application server generations'
     condition:   and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
