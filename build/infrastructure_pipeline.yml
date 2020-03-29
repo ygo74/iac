@@ -39,10 +39,17 @@ jobs:
             echo "Found file : $file"
             directory=($dirname "$file")
             if [[ $directory == *"infrastructure/definitions"* ]]; then
-              application_name=$(basename $file)
-              echo "It's application definition : $application_name"
+              application_name=$(basename $file .yml)
+              echo "Found application definition : $application_name"
+              echo "##vso[task.setvariable variable=application_name;]$application_name"
+
             fi
           done
+
+          if [ -z "$application_name"]
+            echo "No application definiton modified"
+            exit 1
+          fi
 
           echo "***************************************************************"
           export
@@ -79,7 +86,7 @@ jobs:
         workingDirectory: 'tools/ansible'
         script: |
           source ../../ansible-2.9.6/bin/activate
-          ansible-playbook 00-generate-application-servers.yml -e application=app1
+          ansible-playbook 00-generate-application-servers.yml -e application=$(application_name)
     displayName: 'Execute ansible'
     condition:   and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
 
