@@ -6,6 +6,7 @@ trigger:
   paths:
     include:
     - infrastructure/*
+    - build/infrastructure_pipeline.yml
     exclude:
     - /**/*.md
 
@@ -28,9 +29,10 @@ jobs:
         workingDirectory: 'tools/ansible'
         script: |
           git diff-tree --no-commit-id --name-only -r $BUILD_SOURCEVERSION
-          $modifications=$(git diff-tree --no-commit-id --name-only -r $BUILD_SOURCEVERSION)
+          modifications=$(git diff-tree --no-commit-id --name-only -r $BUILD_SOURCEVERSION)
 
           echo "***************************************************************"
+          echo "modifications : $modifications"
           echo "***************************************************************"
           echo "***************************************************************"
           export
