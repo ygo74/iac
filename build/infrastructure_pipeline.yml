@@ -53,5 +53,5 @@ jobs:
         workingDirectory: tools/ansible
         script: |
           source ../../my_env/bin/activate
-          ansible-playbook 00-generate-application-servers -e application=app1
+          ansible-playbook 00-generate-application-servers.yml -e application=app1
     displayName: 'Execute ansible'
