@@ -12,9 +12,58 @@ trigger:
 
 jobs:
 
+# -----------------------------------------------------------------------------
+# ValidateStructure :
+# - Convert files dos2unix
+# - yaml lint infrastructure definitions
+# -----------------------------------------------------------------------------
+- job: ValidateStructure
+  pool:
+    vmImage: 'Ubuntu-16.04'
+
+  steps:
+
+    # Install tools
+    - task: Bash@3
+      inputs:
+          targetType: 'inline'
+          script: |
+            python -m pip install --upgrade pip setuptools wheel
+            python -m pip install virtualenv
+            python -m virtualenv ansible-2.9.6
+            source ansible-2.9.6/bin/activate
+            python -m pip install -r tools/ansible/venv_requirements.txt
+            sudo apt-get install dos2unix
+      displayName: 'Install tools'
+
+    # Convert files dos2unix
+    - task: Bash@3
+      inputs:
+          targetType: 'inline'
+          workingDirectory: .
+          script: |
+            find infrastructure/definitions/ -type f -not -path '*/\.*' -exec grep -Il '.' {} \; | xargs -d '\n' -L 1 dos2unix -k
+      displayName: 'Convert files dos2unix'
+
+    # yaml lint ansible code
+    - task: Bash@3
+      inputs:
+          targetType: 'inline'
+          workingDirectory: infrastructure/definitions
+          script: |
+            source ../../ansible-2.9.6/bin/activate
+            yamllint .
+      displayName: 'Yaml lint'
+
+
+# -----------------------------------------------------------------------------
+# IdentifyApplications
+# -----------------------------------------------------------------------------
 - job: IdentifyApplications
   pool:
     vmImage: 'Ubuntu-16.04'
+
+  condition:   and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
 
   steps:
 
@@ -60,13 +109,18 @@ jobs:
       name:        'GetMatrixVariables'
       displayName: 'Export variables'
 
-
+# -----------------------------------------------------------------------------
+# BuildInfrastructure
+# -----------------------------------------------------------------------------
 - job: BuildInfrastructure
   pool:
     vmImage: 'Ubuntu-16.04'
   dependsOn: IdentifyApplications
   strategy:
     matrix: $[ dependencies.IdentifyApplications.outputs['GetMatrixVariables.applications'] ]
+
+  condition:   and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+
   steps:
 
     # Checkout the repository and keep git credential
@@ -125,6 +179,7 @@ jobs:
             git add infrastructure/generated
             git status
             git commit -m "Automatic Generated servers [skip ci]"
+            git pull
             git push --set-upstream origin $branch_name
       displayName: 'Commit application server generations'
       condition:   and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
