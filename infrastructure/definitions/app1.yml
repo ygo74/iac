@@ -23,7 +23,7 @@ application:
           capacity:     100
 
     front_web:
-      server_cpu:    6
+      server_cpu:    16
       server_memory: 4096
 
     read_api:
