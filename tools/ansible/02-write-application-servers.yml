@@ -34,9 +34,15 @@
             path:  '{{ application_servers_path }}'
             state: 'directory'
 
+        # # Write servers
+        # - name: write servers
+        #   template:
+        #     dest: '{{ application_servers_path }}/{{ item.key }}.yml'
+        #     src:  'server_defintion.yml.j2'
+        #   loop: '{{ application_servers_selected | dict2items }}'
+
         # Write servers
-        - name: write servers
+        - name: write  all servers
           template:
-            dest: '{{ application_servers_path }}/{{ item.key }}.yml'
-            src:  'server_defintion.yml.j2'
-          loop: '{{ application_servers_selected | dict2items }}'
+            dest: '{{ application_servers_path }}/{{ application }}.yml'
+            src:  'all_servers_defintion.yml.j2'
