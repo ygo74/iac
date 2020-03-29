@@ -71,6 +71,10 @@ jobs:
         script: |
           git config --global user.email "you@example.com"
           git config --global user.name "Your Name"
+          echo "***************************************************************"
+          echo "Current branch : $(git symbolic-ref --short HEAD)"
+          echo "***************************************************************"
+
           git checkout -b infra/app1
           git ls-files infrastructure/generated -o --exclude-standard | xargs -i git add '{}'
           git add infrastructure/generated
