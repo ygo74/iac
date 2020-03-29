@@ -71,11 +71,11 @@ jobs:
         script: |
           git config --global user.email "you@example.com"
           git config --global user.name "Your Name"
-          git switch -
+          git checkout -b infra/app1
           git ls-files infrastructure/generated -o --exclude-standard | xargs -i git add '{}'
           git add infrastructure/generated
           git status
           git commit -m "Automatic Generated servers [skip ci]"
-         # git push origin HEAD:<name-of-remote-branch>
+          git push --set-upstream origin infra/app1
     displayName: 'Commit application server generations'
     condition:   and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
