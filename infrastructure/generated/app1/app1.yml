@@ -47,7 +47,7 @@ front_dev_1:
     server_disk:
     -   capacity: 100
         drive_letter: 'c:'
-    -   capacity: 100
+    -   capacity: 50
         drive_letter: 'd:'
     server_environment: dev
     server_location: europe
@@ -59,7 +59,7 @@ front_uat_1:
     server_disk:
     -   capacity: 100
         drive_letter: 'c:'
-    -   capacity: 100
+    -   capacity: 50
         drive_letter: 'd:'
     server_environment: uat
     server_location: europe
@@ -71,7 +71,7 @@ front_uat_2:
     server_disk:
     -   capacity: 100
         drive_letter: 'c:'
-    -   capacity: 100
+    -   capacity: 50
         drive_letter: 'd:'
     server_environment: uat
     server_location: europe
@@ -83,7 +83,7 @@ read_dev_1:
     server_disk:
     -   capacity: 100
         drive_letter: 'c:'
-    -   capacity: 100
+    -   capacity: 50
         drive_letter: 'd:'
     server_environment: dev
     server_location: europe
@@ -95,7 +95,7 @@ read_uat_1:
     server_disk:
     -   capacity: 100
         drive_letter: 'c:'
-    -   capacity: 100
+    -   capacity: 50
         drive_letter: 'd:'
     server_environment: uat
     server_location: europe
@@ -107,7 +107,7 @@ read_uat_2:
     server_disk:
     -   capacity: 100
         drive_letter: 'c:'
-    -   capacity: 100
+    -   capacity: 50
         drive_letter: 'd:'
     server_environment: uat
     server_location: europe
@@ -119,7 +119,7 @@ write_dev_1:
     server_disk:
     -   capacity: 100
         drive_letter: 'c:'
-    -   capacity: 100
+    -   capacity: 50
         drive_letter: 'd:'
     server_environment: dev
     server_location: europe
@@ -131,7 +131,7 @@ write_uat_1:
     server_disk:
     -   capacity: 100
         drive_letter: 'c:'
-    -   capacity: 100
+    -   capacity: 50
         drive_letter: 'd:'
     server_environment: uat
     server_location: europe
@@ -143,7 +143,7 @@ write_uat_2:
     server_disk:
     -   capacity: 100
         drive_letter: 'c:'
-    -   capacity: 100
+    -   capacity: 50
         drive_letter: 'd:'
     server_environment: uat
     server_location: europe
