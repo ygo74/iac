@@ -72,6 +72,7 @@ jobs:
           git config --global user.name "Your Name"
           git ls-files infrastructure/generated -o --exclude-standard | xargs -i git add '{}'
           git add infrastructure/generated
+          git status
           git commit -m "Automatic Generated servers [skip ci]"
     displayName: 'Commit application server generations'
     condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
