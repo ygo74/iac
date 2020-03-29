@@ -62,6 +62,7 @@ jobs:
 - job: IdentifyApplications
   pool:
     vmImage: 'Ubuntu-16.04'
+  dependsOn: ValidateStructure
 
   condition:   and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
 
@@ -179,7 +180,7 @@ jobs:
             git add infrastructure/generated
             git status
             git commit -m "Automatic Generated servers [skip ci]"
-            git pull
+            git pull origin/$branch_name $branch_name
             git push --set-upstream origin $branch_name
       displayName: 'Commit application server generations'
       condition:   and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
