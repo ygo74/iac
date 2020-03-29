@@ -47,8 +47,8 @@ jobs:
         script: |
           python -m pip install --upgrade pip setuptools wheel
           python -m pip install virtualenv
-          python -m virtualenv my_env
-          source my_env/bin/activate
+          python -m virtualenv ansible-2.9.6
+          source ansible-2.9.6/bin/activate
           python -m pip install -r tools/ansible/venv_requirements.txt
           sudo apt-get install dos2unix
     displayName: 'Install tools'
@@ -58,7 +58,7 @@ jobs:
         targetType: 'inline'
         workingDirectory: tools/ansible
         script: |
-          source ../../my_env/bin/activate
+          source ../../ansible-2.9.6/bin/activate
           ansible-playbook 00-generate-application-servers.yml -e application=app1
     displayName: 'Execute ansible'
     condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
@@ -66,11 +66,12 @@ jobs:
   - task: Bash@3
     inputs:
         targetType: 'inline'
-        workingDirectory: infrastructure/generated
+        workingDirectory: .
         script: |
           git config --global user.email "you@example.com"
           git config --global user.name "Your Name"
-          git ls-files -o --exclude-standard | xargs -i git add '{}'
+          git ls-files infrastructure/generated -o --exclude-standard | xargs -i git add '{}'
+          git add infrastructure/generated
           git commit -m "Automatic Generated servers [skip ci]"
     displayName: 'Commit application server generations'
     condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
