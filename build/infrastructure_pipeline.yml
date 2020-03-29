@@ -34,6 +34,11 @@ jobs:
           echo "***************************************************************"
           echo "modifications : $modifications"
           echo "***************************************************************"
+          for file in $modifications
+          do
+            echo "Found file : $file"
+          done
+
           echo "***************************************************************"
           export
 
