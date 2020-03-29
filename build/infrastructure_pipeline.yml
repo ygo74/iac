@@ -80,8 +80,6 @@ jobs:
   strategy:
     matrix: $[ dependencies.IdentifyApplications.outputs['GetMatrixVariables.applications'] ]
 
-  condition:   and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
-
   steps:
 
     # Checkout the repository and keep git credential
@@ -101,26 +99,6 @@ jobs:
     #     keyVaultName:  'mesfVault'
     #     secretsFilter: 'Ansible-Automation'
 
-    # Convert files dos2unix
-    - task: Bash@3
-      inputs:
-          targetType: 'inline'
-          workingDirectory: .
-          script: |
-            find infrastructure/definitions/ -type f -not -path '*/\.*' -exec grep -Il '.' {} \; | xargs -d '\n' -L 1 dos2unix -k
-      displayName: 'Convert files dos2unix'
-
-    # yaml lint ansible code
-    - task: Bash@3
-      inputs:
-          targetType: 'inline'
-          workingDirectory: infrastructure/definitions
-          script: |
-            source ../../ansible-2.9.6/bin/activate
-            yamllint -c ../.yamllint .
-      displayName: 'Yaml lint'
-
-
     - task: Bash@3
       inputs:
           targetType: 'inline'
@@ -133,6 +111,26 @@ jobs:
             sudo apt-get install dos2unix
       displayName: 'Install tools'
 
+    # Convert files dos2unix
+    - task: Bash@3
+      inputs:
+          targetType: 'inline'
+          workingDirectory: infrastructure/definitions
+          script: |
+            # find infrastructure/definitions/ -type f -not -path '*/\.*' -exec grep -Il '.' {} \; | xargs -d '\n' -L 1 dos2unix -k
+            dos2unix $(application_name).yml
+      displayName: 'Convert files dos2unix'
+
+    # yaml lint ansible code
+    - task: Bash@3
+      inputs:
+          targetType: 'inline'
+          workingDirectory: infrastructure/definitions
+          script: |
+            source ../../ansible-2.9.6/bin/activate
+            yamllint -c ../.yamllint $(application_name).yml
+      displayName: 'Yaml lint'
+
     - task: Bash@3
       inputs:
           targetType:       'inline'
@@ -141,7 +139,6 @@ jobs:
             source ../../ansible-2.9.6/bin/activate
             ansible-playbook 00-generate-application-servers.yml -e application=$(application_name)
       displayName: 'Execute ansible'
-      condition:   and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
 
     - task: Bash@3
       inputs:
