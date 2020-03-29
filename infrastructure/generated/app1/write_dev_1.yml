@@ -4,7 +4,7 @@ server_cpu: 8
 server_disk:
 -   capacity: 100
     drive_letter: 'c:'
--   capacity: 7
+-   capacity: 9
     drive_letter: 'd:'
 server_environment: dev
 server_location: europe
