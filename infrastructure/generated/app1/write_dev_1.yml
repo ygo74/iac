@@ -1,0 +1,13 @@
+---
+# Ansible managed
+server_cpu: 8
+server_disk:
+-   capacity: 100
+    drive_letter: 'c:'
+-   capacity: 50
+    drive_letter: 'd:'
+server_environment: dev
+server_location: europe
+server_memory: 8192
+server_os: win2k19
+server_role: write_api
