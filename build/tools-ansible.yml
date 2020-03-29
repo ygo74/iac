@@ -54,7 +54,7 @@ jobs:
         targetType: 'inline'
         workingDirectory: tools/ansible
         script: |
-          source my_env/bin/activate
+          source ../../my_env/bin/activate
           yamllint .
     displayName: 'Yaml lint'
 
@@ -64,6 +64,6 @@ jobs:
         targetType: 'inline'
         workingDirectory: tools/ansible
         script: |
-          source my_env/bin/activate
+          source ../../my_env/bin/activate
           ansible-lint .
     displayName: 'Ansible lint'
