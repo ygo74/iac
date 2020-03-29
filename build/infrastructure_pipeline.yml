@@ -68,6 +68,8 @@ jobs:
         targetType: 'inline'
         workingDirectory: infrastructure/generated
         script: |
+          git config --global user.email "you@example.com"
+          git config --global user.name "Your Name"
           git ls-files -o --exclude-standard | xargs -i git add '{}'
           git commit -m "Automatic Generated servers [skip ci]"
     displayName: 'Commit application server generations'
