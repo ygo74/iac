@@ -61,3 +61,14 @@ jobs:
           source ../../my_env/bin/activate
           ansible-playbook 00-generate-application-servers.yml -e application=app1
     displayName: 'Execute ansible'
+    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+
+  - task: Bash@3
+    inputs:
+        targetType: 'inline'
+        workingDirectory: infrastructure/generated
+        script: |
+          git ls-files -o --exclude-standard | xargs -i git add '{}'
+          git commit -m "Automatic Generated servers [skip ci]"
+    displayName: 'Commit application server generations'
+    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
