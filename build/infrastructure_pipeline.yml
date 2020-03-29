@@ -62,7 +62,7 @@ jobs:
           source ../../ansible-2.9.6/bin/activate
           ansible-playbook 00-generate-application-servers.yml -e application=app1
     displayName: 'Execute ansible'
-    condition:   and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
+    condition:   and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
 
   - task: Bash@3
     inputs:
@@ -78,4 +78,4 @@ jobs:
           git commit -m "Automatic Generated servers [skip ci]"
           git push --set-upstream origin infra/app1
     displayName: 'Commit application server generations'
-    condition:   and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
+    condition:   and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
