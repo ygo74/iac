@@ -52,7 +52,7 @@ jobs:
           workingDirectory: infrastructure/definitions
           script: |
             source ../../ansible-2.9.6/bin/activate
-            yamllint .
+            yamllint -c ../.yamllint .
       displayName: 'Yaml lint'
 
 
