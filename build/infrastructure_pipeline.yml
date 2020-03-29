@@ -38,7 +38,7 @@ jobs:
           do
             echo "Found file : $file"
             directory=($dirname "$file")
-            if [[ $string == *"infrastructure/definitions"* ]]; then
+            if [[ $directory == *"infrastructure/definitions"* ]]; then
               application_name=$(basename $file)
               echo "It's application definition : $application_name"
             fi
