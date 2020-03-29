@@ -1,3 +1,4 @@
+---
 extends: default
 
 rules:
@@ -19,7 +20,7 @@ rules:
     level: error
   indentation:
     indent-sequences: true
-    #Fix this ignore path
+    # Fix this ignore path
     ignore: |
       molecule.yml
       playbook.yml

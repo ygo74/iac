@@ -19,9 +19,9 @@
         # Check mandatory variables
         - name: Check mandatory variables
           assert:
-              that:
-                - application_servers_selected is defined
-              fail_msg: "Missing mandatory variables"
+            that:
+              - application_servers_selected is defined
+            fail_msg: "Missing mandatory variables"
 
     # -----------------------------------------------------------------------------
     # write servers output structure

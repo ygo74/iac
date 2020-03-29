@@ -30,16 +30,16 @@
         # Check mandatory variables
         - name: Check mandatory variables
           assert:
-              that:
-                - application is defined
-              fail_msg: "Missing mandatory variables"
+            that:
+              - application is defined
+            fail_msg: "Missing mandatory variables"
 
         # Check application definition file exists
         - name: Check application definition file exists
           assert:
-              that:
-                - lookup('file', application_definition_path, errors='ignore') != none
-              fail_msg: "Missing application definition file {{ application_definition_path }}"
+            that:
+              - lookup('file', application_definition_path, errors='ignore') != none
+            fail_msg: "Missing application definition file {{ application_definition_path }}"
 
     # -----------------------------------------------------------------------------
     # Load application definition and check the structure
@@ -57,22 +57,22 @@
         # Check default structure
         - name: Check default structure
           assert:
-              that:
-                - application_definition.application is defined
-                - application_definition.application.roles is defined
-                - application_definition.application.roles.keys() | length > 0
-                - application_definition.application.locations.keys() | length > 0
-                - application_definition.environments is defined
-                - application_definition.environments.keys() | length > 0
-              fail_msg: "Default structure is incorrect"
+            that:
+              - application_definition.application is defined
+              - application_definition.application.roles is defined
+              - application_definition.application.roles.keys() | length > 0
+              - application_definition.application.locations.keys() | length > 0
+              - application_definition.environments is defined
+              - application_definition.environments.keys() | length > 0
+            fail_msg: "Default structure is incorrect"
 
         # Check environments structure
         - name: Check environments structure
           assert:
-              that:
-                - item.value.servers is defined
-                - item.value.servers | length > 0
-              fail_msg: "Missing servers defintions in environment {{ item.key }}"
+            that:
+              - item.value.servers is defined
+              - item.value.servers | length > 0
+            fail_msg: "Missing servers defintions in environment {{ item.key }}"
           loop: '{{ application_definition.environments | dict2items }}'
 
     # -----------------------------------------------------------------------------
@@ -103,8 +103,6 @@
                 -%}
               {%- endfor -%}
               {{ servers }}
-
-
 
         - debug:
             var: application_servers_selected
