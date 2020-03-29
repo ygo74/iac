@@ -1,6 +1,6 @@
 ---
 # Ansible managed
-server_cpu: 4
+server_cpu: 3
 server_disk:
 -   capacity: 100
     drive_letter: 'c:'
