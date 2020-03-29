@@ -20,7 +20,7 @@ application:
         - drive_letter: 'c:'
           capacity:     100
         - drive_letter: 'd:'
-          capacity:     53
+          capacity:     54
 
     front_web:
       server_cpu:    4
