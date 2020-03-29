@@ -11,17 +11,11 @@ trigger:
     - /**/*.md
 
 jobs:
-- job: BuildInfrastructure
+- job: IdentifyApplications
   pool:
     vmImage: 'Ubuntu-16.04'
 
   steps:
-
-  # Checkout the repository and keep git credential
-  - checkout:           self
-    clean:              true
-    submodules:         true
-    persistCredentials: true
 
   - task: Bash@3
     inputs:
@@ -41,21 +35,39 @@ jobs:
             if [[ $directory == *"infrastructure/definitions"* ]]; then
               application_name=$(basename $file .yml)
               echo "Found application definition : $application_name"
-              echo "##vso[task.setvariable variable=application_name;]$application_name"
-
+              applications=$applications,"'$application_name':{'application_name':'$application_name'}"
             fi
           done
 
-          if [[ -z "$application_name" ]]; then
+          if [[ -z "$applications" ]]; then
             echo "No application definiton modified"
             exit 1
+          else
+            applications=${applications:1}
+            applications={$applications}
+            echo "Matrix variables : $applications"
+            echo "##vso[task.setvariable variable=applications;]$applications"
           fi
 
           echo "***************************************************************"
           export
-
+    name:        'GetMatrixVariables'
     displayName: 'Export variables'
 
+
+- job: BuildInfrastructure
+  pool:
+    vmImage: 'Ubuntu-16.04'
+  dependsOn: IdentifyApplications
+  strategy:
+    matrix: $[ dependencies.IdentifyApplications.outputs['GetMatrixVariables.applications'] ]
+  steps:
+
+  # Checkout the repository and keep git credential
+  - checkout:           self
+    clean:              true
+    submodules:         true
+    persistCredentials: true
 
   - task: UsePythonVersion@0
     inputs:
