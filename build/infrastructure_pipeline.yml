@@ -159,7 +159,7 @@ jobs:
             git add infrastructure/generated
             git status
             git commit -m "Automatic Generated servers [skip ci]"
-            git pull origin/$branch_name $branch_name
+            git pull
             git push --set-upstream origin $branch_name
       displayName: 'Commit application server generations'
       condition:   and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
