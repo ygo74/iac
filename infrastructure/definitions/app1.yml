@@ -27,7 +27,7 @@ application:
       server_memory: 4096
 
     read_api:
-      server_cpu:    4
+      server_cpu:    1
       server_memory: 8192
 
     write_api:
