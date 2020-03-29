@@ -46,8 +46,9 @@ jobs:
             fi
           done
 
-          if [ -z "$application_name"]
+          if [ -z "$application_name" ]
             echo "No application definiton modified"
+            exit 1
           fi
 
           echo "***************************************************************"
