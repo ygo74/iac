@@ -5,12 +5,16 @@ all:
         applications:
             children:
                 app2:
-                    hosts:
-                        front_dev_1:
-                        read_dev_1:
+                    children:
+                        front_web:
+                            hosts:
+                            - front_dev_1
+                        read_api:
+                            hosts:
+                            - read_dev_1
         locations:
             children:
                 europe:
                     hosts:
-                        front_dev_1:
-                        read_dev_1:
+                    - front_dev_1
+                    - read_dev_1
