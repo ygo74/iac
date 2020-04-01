@@ -11,3 +11,4 @@ server_location: europe
 server_memory: 4096
 server_os: win2k16
 server_role: front_web
+server_subnet: 192.160.1.0/24

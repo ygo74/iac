@@ -13,3 +13,4 @@ server_location: europe
 server_memory: 16384
 server_os: win2k16
 server_role: database
+server_subnet: 192.161.4.0/24

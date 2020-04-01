@@ -1,6 +1,6 @@
 ---
 # Ansible managed
-server_cpu: 8
+server_cpu: 4
 server_disk:
 -   capacity: 100
     drive_letter: 'c:'
@@ -10,6 +10,7 @@ server_disk:
     drive_letter: 'e:'
 server_environment: dev
 server_location: europe
-server_memory: 16384
+server_memory: 4096
 server_os: win2k16
 server_role: database
+server_subnet: 192.160.1.0/24

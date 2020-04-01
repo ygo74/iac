@@ -5,20 +5,84 @@
 - name: Load application definition
   hosts: localhost
   connection: local
+  gather_facts: false
 
   vars:
     application_definition_path: '../../infrastructure/definitions/{{ application }}.yml'
 
 
+    # -----------------------------------------------------------------------------
     # application definition roles
+    # -----------------------------------------------------------------------------
+    # shortcut to application.roles
     application_definition_roles: '{{ application_definition.application.roles }}'
 
     # default application definition
     application_definition_role_default: >-
       {{ application_definition_roles.default | default({}) }}
 
+    # default application definition
+    application_definition_role: >-
+      {{ application_definition_roles[item.value.server_role] | default({}) }}
+
+    # -----------------------------------------------------------------------------
     # application definition locations
+    # -----------------------------------------------------------------------------
+    # Shortcut to application.locations
     application_definition_locations: '{{ application_definition.application.locations }}'
+
+    # Shortcut to application.locations[server_location].roles
+    application_definition_location: >-
+      {{ (application_definition_locations[item.value.server_location]
+           | default({})
+         ).roles
+      }}
+
+    # application definition default role in location
+    application_definition_location_role_default: >-
+      {{ application_definition_location.default | default({}) }}
+
+    # application definition role in location
+    application_definition_location_role: >-
+      {{ application_definition_location[item.value.server_role] | default({}) }}
+
+    # -----------------------------------------------------------------------------
+    # Environment application definition roles
+    # -----------------------------------------------------------------------------
+    # shortcut to application.environment[server_environment].roles
+    application_environment_roles: >-
+      {{ application_definition.environments[item.value.server_environment].roles | default({}) }}
+
+    # application environment default role
+    application_environment_role_default: >-
+      {{ application_environment_roles.default | default({}) }}
+
+    # application environment role
+    application_environment_role: >-
+      {{ application_environment_roles[item.value.server_role] | default({}) }}
+
+    # -----------------------------------------------------------------------------
+    # Environment application definition locations
+    # -----------------------------------------------------------------------------
+    # shortcut to application.environment[server_environment].locations
+    application_environment_locations: >-
+      {{ application_definition.environments[item.value.server_environment].locations |default({}) }}
+
+    # Shortcut to application.environment[server_environment].locations.roles
+    application_environment_location: >-
+      {{ (application_environment_locations[item.value.server_location]
+           | default({})
+         ).roles
+      }}
+
+    # application defenvironmentinition default role in location
+    application_environment_location_role_default: >-
+      {{ application_environment_location.default | default({}) }}
+
+    # application definition role in location
+    application_environment_location_role: >-
+      {{ application_environment_location[item.value.server_role] | default({}) }}
+
 
   tasks:
 
@@ -96,16 +160,63 @@
               {%- for server_name, server in item.value.iteritems() -%}
                 {%- do servers.update( {server_name: server
                                         | combine({ "server_environment": item.key })
-                                        | combine(application_definition_role_default)
-                                        | combine( application_definition_roles[server.server_role] | default({}))
                                        }
                                      )
                 -%}
               {%- endfor -%}
               {{ servers }}
 
+        - name: Display debug variables
+          debug:
+            var: application_environment_location
+            verbosity: 4
+          loop: "{{ application_servers_selected | dict2items }}"
+          loop_control:
+            label: '{{ item.key }}'
+
+        - name: Check data coherence
+          assert:
+            that:
+              - item.value.server_environment is defined
+              - item.value.server_location is defined
+              - item.value.server_role is defined
+              - application_definition_role_default is defined
+              - application_definition_role is defined
+              - application_definition_location_role_default is defined
+              - application_definition_location_role is defined
+              - application_environment_role_default is defined
+              - application_environment_role is defined
+              - application_environment_locations is defined
+              - application_environment_location is defined
+              - application_environment_location_role_default is defined
+              - application_environment_location_role is defined
+
+          loop: "{{ application_servers_selected | dict2items }}"
+          loop_control:
+            label: '{{ item.key }}'
+
+        - name: Populate servers data
+          set_fact:
+            application_servers_selected: >-
+              {{ application_servers_selected |
+                 combine({ item.key: {}
+                            | combine( application_definition_role_default )
+                            | combine( application_definition_role )
+                            | combine( application_definition_location_role_default )
+                            | combine( application_definition_location_role )
+                            | combine( application_environment_role_default )
+                            | combine( application_environment_role )
+                            | combine( application_environment_location_role_default )
+                            | combine( application_environment_location_role )
+                            | combine( item.value )
+                         })
+              }}
+
+          loop: "{{ application_servers_selected | dict2items }}"
+
         - debug:
             var: application_servers_selected
+            # verbosity: 4
 
       tags:
         - test

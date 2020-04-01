@@ -1,0 +1,144 @@
+digraph "all" {
+  rankdir=TB;
+
+  "all" [shape=record label=<
+<table border="0" cellborder="0">
+  <tr><td><b>
+  <font face="Times New Roman, Bold" point-size="16">all</font>
+  </b></td></tr>
+</table>
+>]
+  "app1" [shape=record label=<
+<table border="0" cellborder="0">
+  <tr><td><b>
+  <font face="Times New Roman, Bold" point-size="16">app1</font>
+  </b></td></tr>
+</table>
+>]
+  "applications" [shape=record label=<
+<table border="0" cellborder="0">
+  <tr><td><b>
+  <font face="Times New Roman, Bold" point-size="16">applications</font>
+  </b></td></tr>
+</table>
+>]
+  "database" [shape=record label=<
+<table border="0" cellborder="0">
+  <tr><td><b>
+  <font face="Times New Roman, Bold" point-size="16">database</font>
+  </b></td></tr>
+</table>
+>]
+  "database_dev_1" [shape=record style=rounded label=<
+<table border="0" cellborder="0">
+  <tr><td><b>
+  <font face="Times New Roman, Bold" point-size="16">database_dev_1</font>
+  </b></td></tr>
+</table>
+>]
+  "database_europe" [shape=record label=<
+<table border="0" cellborder="0">
+  <tr><td><b>
+  <font face="Times New Roman, Bold" point-size="16">database_europe</font>
+  </b></td></tr>
+</table>
+>]
+  "europe" [shape=record label=<
+<table border="0" cellborder="0">
+  <tr><td><b>
+  <font face="Times New Roman, Bold" point-size="16">europe</font>
+  </b></td></tr>
+</table>
+>]
+  "front_dev_1" [shape=record style=rounded label=<
+<table border="0" cellborder="0">
+  <tr><td><b>
+  <font face="Times New Roman, Bold" point-size="16">front_dev_1</font>
+  </b></td></tr>
+</table>
+>]
+  "front_web" [shape=record label=<
+<table border="0" cellborder="0">
+  <tr><td><b>
+  <font face="Times New Roman, Bold" point-size="16">front_web</font>
+  </b></td></tr>
+</table>
+>]
+  "front_web_europe" [shape=record label=<
+<table border="0" cellborder="0">
+  <tr><td><b>
+  <font face="Times New Roman, Bold" point-size="16">front_web_europe</font>
+  </b></td></tr>
+</table>
+>]
+  "locations" [shape=record label=<
+<table border="0" cellborder="0">
+  <tr><td><b>
+  <font face="Times New Roman, Bold" point-size="16">locations</font>
+  </b></td></tr>
+</table>
+>]
+  "read_api" [shape=record label=<
+<table border="0" cellborder="0">
+  <tr><td><b>
+  <font face="Times New Roman, Bold" point-size="16">read_api</font>
+  </b></td></tr>
+</table>
+>]
+  "read_api_europe" [shape=record label=<
+<table border="0" cellborder="0">
+  <tr><td><b>
+  <font face="Times New Roman, Bold" point-size="16">read_api_europe</font>
+  </b></td></tr>
+</table>
+>]
+  "read_dev_1" [shape=record style=rounded label=<
+<table border="0" cellborder="0">
+  <tr><td><b>
+  <font face="Times New Roman, Bold" point-size="16">read_dev_1</font>
+  </b></td></tr>
+</table>
+>]
+  "write_api" [shape=record label=<
+<table border="0" cellborder="0">
+  <tr><td><b>
+  <font face="Times New Roman, Bold" point-size="16">write_api</font>
+  </b></td></tr>
+</table>
+>]
+  "write_api_europe" [shape=record label=<
+<table border="0" cellborder="0">
+  <tr><td><b>
+  <font face="Times New Roman, Bold" point-size="16">write_api_europe</font>
+  </b></td></tr>
+</table>
+>]
+  "write_dev_1" [shape=record style=rounded label=<
+<table border="0" cellborder="0">
+  <tr><td><b>
+  <font face="Times New Roman, Bold" point-size="16">write_dev_1</font>
+  </b></td></tr>
+</table>
+>]
+
+  "all" -> "applications";
+  "all" -> "locations";
+  "app1" -> "database";
+  "app1" -> "read_api";
+  "app1" -> "front_web";
+  "app1" -> "write_api";
+  "applications" -> "app1";
+  "database" -> "database_europe";
+  "database_europe" -> "database_dev_1";
+  "europe" -> "write_api_europe";
+  "europe" -> "database_europe";
+  "europe" -> "front_web_europe";
+  "europe" -> "read_api_europe";
+  "front_web" -> "front_web_europe";
+  "front_web_europe" -> "front_dev_1";
+  "locations" -> "europe";
+  "read_api" -> "read_api_europe";
+  "read_api_europe" -> "read_dev_1";
+  "write_api" -> "write_api_europe";
+  "write_api_europe" -> "write_dev_1";
+}

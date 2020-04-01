@@ -1,24 +1,12 @@
 ---
-# Ansible managed
 all: # keys must be unique, i.e. only one 'hosts' per group
     children:   # key order does not matter, indentation does
         applications:
           children:
             app1:
               hosts:
-                  - read_uat_2
-- write_uat_1
-- write_uat_2
-- database_dev_1
-- front_dev_1
-- database_uat_2
-- database_uat_1
-- write_dev_1
-- read_dev_1
-- read_uat_1
-- front_uat_1
-- front_uat_2
-
+                  test1:
+                  test2:
         europe:
             hosts:
               test1:

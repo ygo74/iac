@@ -5,11 +5,69 @@
 - name: Load application definition
   hosts: localhost
   connection: local
+  gather_facts: false
 
   vars:
     application_servers_path: '../../infrastructure/generated/{{ application }}'
 
+    inventory: >-
+      {{
+        { item.value.server_environment: {
+            "all": {
+              "children" : {
+                "applications": {
+                  "children": {
+                    application: {
+                      "children": {
+                        item.value.server_role: {
+                          "hosts": application_servers_selected | dict2items
+                                    | json_query("[?value.server_environment=='" + item.value.server_environment + "'
+                                                   && value.server_role=='" + item.value.server_role + "'].key")
+                        }
+                      }
+                    }
+                  }
+                },
+                "locations": {
+                  "children": {
+                        item.value.server_location: {
+                          "hosts": application_servers_selected | dict2items
+                                    | json_query("[?value.server_environment=='" + item.value.server_environment + "'
+                                                   && value.server_location=='" + item.value.server_location + "'].key")
+                        }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }}
+
+    # application_servers_selected:
+    #   test1:
+    #     server_environment: dev
+    #     server_role: r1
+    #   test2:
+    #     server_environment: dev
+    #     server_role: r1
+    #   test3:
+    #     server_environment: uat
+    #     server_role: r1
+
+    inventory_server_roles: >-
+      {{ application_servers_selected | dict2items
+          | json_query("[?value.server_environment=='" + item.value.server_environment + "'
+                         && value.server_role=='" + item.value.server_role + "'].key")
+      }}
+
   tasks:
+
+    # - debug:
+    #     var: inventory_server_roles
+    #   loop: '{{ application_servers_selected | dict2items }}'
+
+    # - fail:
+
 
     # -----------------------------------------------------------------------------
     # Assert playbook execution
@@ -22,6 +80,17 @@
             that:
               - application_servers_selected is defined
             fail_msg: "Missing mandatory variables"
+
+
+    - set_fact:
+        inventory_all: >-
+             {{ inventory_all | default({})
+               | combine( inventory, recursive=True)
+             }}
+      loop: '{{ application_servers_selected | dict2items }}'
+
+    - debug:
+        var: inventory_all
 
     # -----------------------------------------------------------------------------
     # write servers output structure
@@ -38,11 +107,18 @@
         - name: write servers
           template:
             dest: '{{ application_servers_path }}/{{ item.key }}.yml'
-            src:  'server_defintion.yml.j2'
+            src:  'server_definition.yml.j2'
           loop: '{{ application_servers_selected | dict2items }}'
 
+        - name: write application inventory folder
+          file:
+            path:  '{{ application_servers_path }}/{{ item.key }}'
+            state: 'directory'
+          loop: '{{ inventory_all | dict2items }}'
+
         # Write servers
-        # - name: write  all servers
-        #   template:
-        #     dest: '{{ application_servers_path }}/{{ application }}.yml'
-        #     src:  'all_servers_defintion.yml.j2'
+        - name: write  inventory
+          template:
+            dest: '{{ application_servers_path }}/{{ item.key }}/{{ application }}.yml'
+            src:  'application_inventory.yml.j2'
+          loop: '{{ inventory_all | dict2items }}'

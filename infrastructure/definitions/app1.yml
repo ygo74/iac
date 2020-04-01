@@ -111,6 +111,7 @@ environments:
         server_role:     database
 
   uat:
+
     locations:
       # type specification
       europe:

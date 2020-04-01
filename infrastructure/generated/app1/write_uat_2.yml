@@ -11,3 +11,4 @@ server_location: europe
 server_memory: 8192
 server_os: win2k19
 server_role: write_api
+server_subnet: 192.161.3.0/24
