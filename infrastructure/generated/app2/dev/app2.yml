@@ -6,41 +6,29 @@ all:
             children:
                 app2:
                     children:
-                        r1:
+                        front_web:
                             hosts:
-                                test1: {}
-                                test2: {}
-                                test3: {}
+                                front_dev_1: {}
+                        read_api:
+                            hosts:
+                                read_dev_1: {}
         locations:
             children:
                 europe:
                     hosts:
-                        test1: {}
-                        test3: {}
-                us:
-                    hosts:
-                        test2: {}
+                        front_dev_1: {}
+                        read_dev_1: {}
         os:
             children:
-                linux:
-                    children:
-                        rhel75:
-                            hosts:
-                                test3: {}
                 windows:
                     children:
                         win2k16:
                             hosts:
-                                test1: {}
-                        win2k19:
-                            hosts:
-                                test2: {}
+                                front_dev_1: {}
+                                read_dev_1: {}
         providers:
             children:
                 azure:
                     hosts:
-                        test1: {}
-                        test2: {}
-                vmware:
-                    hosts:
-                        test3: {}
+                        front_dev_1: {}
+                        read_dev_1: {}
