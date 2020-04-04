@@ -1,0 +1,101 @@
+---
+# -----------------------------------------------------------------------------
+# Inventory definition
+# -----------------------------------------------------------------------------
+inventory: >-
+  {{
+    { item.value.server_environment: {
+        "all": {
+          "children" : {
+            "applications": {
+              "children": {
+                application: {
+                  "children": {
+                    item.value.server_role: {
+                      "hosts": inventory_server_roles
+                    }
+                  }
+                }
+              }
+            },
+            "locations": {
+              "children": {
+                    item.value.server_location: {
+                      "hosts": inventory_server_locations
+                    }
+              }
+            },
+            "providers": {
+              "children": {
+                    item.value.server_provider: {
+                      "hosts": inventory_server_providers
+                    }
+              }
+            },
+            "os": {
+              "children": {
+                item.value.server_os_familly: {
+                  "children": {
+                    item.value.server_os: {
+                      "hosts": inventory_server_os
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }}
+
+# -----------------------------------------------------------------------------
+# Inventory Calculated variables
+# -----------------------------------------------------------------------------
+# servers in application roles
+inventory_server_roles: >-
+  {%- set servers=application_servers_selected | dict2items
+                    | json_query("[?value.server_environment=='" + item.value.server_environment + "'
+                                    && value.server_role=='" + item.value.server_role + "'].{key: key, value: value}")
+  -%}
+  {%- set servers_dict={} -%}
+  {%- for server in servers -%}
+    {%- do servers_dict.update({ server.key: {} }) -%}
+  {%- endfor -%}
+  {{ servers_dict }}
+
+# servers in application locations
+inventory_server_locations: >-
+  {%- set servers=application_servers_selected | dict2items
+                    | json_query("[?value.server_environment=='" + item.value.server_environment + "'
+                                    && value.server_location=='" + item.value.server_location + "'].{key: key, value: value}")
+  -%}
+  {%- set servers_dict={} -%}
+  {%- for server in servers -%}
+    {%- do servers_dict.update({ server.key: {} }) -%}
+  {%- endfor -%}
+  {{ servers_dict }}
+
+# servers for operating systems
+inventory_server_os: >-
+  {%- set servers=application_servers_selected | dict2items
+                    | json_query("[?value.server_environment=='" + item.value.server_environment + "'
+                                    && value.server_os=='" + item.value.server_os + "'].{key: key, value: value}")
+  -%}
+  {%- set servers_dict={} -%}
+  {%- for server in servers -%}
+    {%- do servers_dict.update({ server.key: {} }) -%}
+  {%- endfor -%}
+  {{ servers_dict }}
+
+# servers for providers
+inventory_server_providers: >-
+  {%- set servers=application_servers_selected | dict2items
+                    | json_query("[?value.server_environment=='" + item.value.server_environment + "'
+                                    && value.server_provider=='" + item.value.server_provider + "'].{key: key, value: value}")
+  -%}
+  {%- set servers_dict={} -%}
+  {%- for server in servers -%}
+    {%- do servers_dict.update({ server.key: {} }) -%}
+  {%- endfor -%}
+  {{ servers_dict }}
