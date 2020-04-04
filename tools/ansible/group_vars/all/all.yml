@@ -1,0 +1,38 @@
+---
+# -----------------------------------------------------------------------------
+# Tools configuration
+# -----------------------------------------------------------------------------
+
+os_familly:
+  windows:
+    - win2k12
+    - win2k16
+    - win2k19
+  linux:
+    - rhel75
+    - rhel76
+    - rhel8
+
+vm_provider:
+  europe:
+    windows: azure
+    linux:   azure
+  us:
+    windows: azure
+    linux:   azure
+  asia:
+    windows: azure
+    linux:   azure
+
+
+# -----------------------------------------------------------------------------
+# Tools Calculated variables
+# -----------------------------------------------------------------------------
+os_allowed_values: >-
+  {%- set os={} -%}
+  {%- for familly, values in os_familly.iteritems() -%}
+    {%- for value in values -%}
+        {%- do os.update({value: familly}) -%}
+    {%- endfor -%}
+  {%- endfor -%}
+  {{ os }}

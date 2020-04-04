@@ -18,3 +18,17 @@ all:
                     hosts:
                         front_dev_1: {}
                         read_dev_1: {}
+        os:
+            children:
+                windows:
+                    children:
+                        win2k16:
+                            hosts:
+                                front_dev_1: {}
+                                read_dev_1: {}
+        providers:
+            children:
+                azure:
+                    hosts:
+                        front_dev_1: {}
+                        read_dev_1: {}

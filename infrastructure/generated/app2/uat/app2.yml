@@ -20,3 +20,19 @@ all:
                         front_uat_1: {}
                         read_uat_1: {}
                         read_uat_2: {}
+        os:
+            children:
+                windows:
+                    children:
+                        win2k16:
+                            hosts:
+                                front_uat_1: {}
+                                read_uat_1: {}
+                                read_uat_2: {}
+        providers:
+            children:
+                azure:
+                    hosts:
+                        front_uat_1: {}
+                        read_uat_1: {}
+                        read_uat_2: {}

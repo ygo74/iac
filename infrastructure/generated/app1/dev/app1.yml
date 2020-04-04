@@ -26,3 +26,23 @@ all:
                         front_dev_1: {}
                         read_dev_1: {}
                         write_dev_1: {}
+        os:
+            children:
+                windows:
+                    children:
+                        win2k16:
+                            hosts:
+                                database_dev_1: {}
+                                front_dev_1: {}
+                                read_dev_1: {}
+                        win2k19:
+                            hosts:
+                                write_dev_1: {}
+        providers:
+            children:
+                azure:
+                    hosts:
+                        database_dev_1: {}
+                        front_dev_1: {}
+                        read_dev_1: {}
+                        write_dev_1: {}

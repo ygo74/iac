@@ -153,6 +153,8 @@
           loop: "{{ application_definition.environments |
                     dict2items | json_query('[*].{key: key, value: value.servers}')
                  }}"
+          loop_control:
+            label: '{{ item.key }}'
           vars:
             my_env: '{{ item.key }}'
             my_servers: >-
@@ -195,6 +197,7 @@
           loop_control:
             label: '{{ item.key }}'
 
+        # Populate servers data
         - name: Populate servers data
           set_fact:
             application_servers_selected: >-
@@ -213,10 +216,45 @@
               }}
 
           loop: "{{ application_servers_selected | dict2items }}"
+          loop_control:
+            label: '{{ item.key }}'
 
         - debug:
             var: application_servers_selected
-            # verbosity: 4
+            verbosity: 4
 
-      tags:
-        - test
+    # -----------------------------------------------------------------------------
+    # Append calulated value
+    # -----------------------------------------------------------------------------
+    - name: Append calculated value
+      block:
+        # Check values are allowed
+        - name: Check defintion values are allowed
+          assert:
+            that:
+              - os_allowed_values[item.value.server_os] is defined
+              - vm_provider[item.value.server_location] is defined
+              - vm_provider[item.value.server_location][server_os_familly] is defined
+          loop: "{{ application_servers_selected | dict2items }}"
+          loop_control:
+            label: '{{ item.key }}'
+          vars:
+            server_os_familly: '{{ os_allowed_values[item.value.server_os] | default() }}'
+
+        # Add calculated value
+        - name: Add calculated value
+          set_fact:
+            application_servers_selected: >-
+              {{ application_servers_selected |
+                 combine({ item.key: item.value
+                            | combine({"server_provider": server_provider} )
+                            | combine({"server_os_familly": server_os_familly} )
+                         })
+              }}
+
+          loop: "{{ application_servers_selected | dict2items }}"
+          loop_control:
+            label: '{{ item.key }}'
+          vars:
+            server_os_familly: '{{ os_allowed_values[item.value.server_os] | default() }}'
+            server_provider:   '{{ vm_provider[item.value.server_location][server_os_familly] }}'

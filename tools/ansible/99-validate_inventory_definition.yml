@@ -1,0 +1,120 @@
+---
+# -----------------------------------------------------------------------------
+# Load application definition
+# -----------------------------------------------------------------------------
+- name: Load application definition
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    # -----------------------------------------------------------------------------
+    # Test case
+    # -----------------------------------------------------------------------------
+    application: test
+    application_servers_selected:
+      test1:
+        server_environment: dev
+        server_role: r1
+        server_location: europe
+        server_os_familly: windows
+        server_os: win2k16
+        server_provider: azure
+      test2:
+        server_environment: dev
+        server_role: r1
+        server_location: us
+        server_os_familly: windows
+        server_os: win2k19
+        server_provider: azure
+      test3:
+        server_environment: dev
+        server_role: r1
+        server_location: europe
+        server_os_familly: linux
+        server_os: rhel75
+        server_provider: vmware
+      test4:
+        server_environment: uat
+        server_role: r1
+        server_location: europe
+        server_os_familly: linux
+        server_os: rhel75
+        server_provider: rhev
+
+  tasks:
+
+    # -----------------------------------------------------------------------------
+    # Display variables
+    # -----------------------------------------------------------------------------
+    - name: Display variables
+      block:
+        - name: Display inventory_server_roles
+          debug:
+            var: inventory_server_roles
+          loop: '{{ application_servers_selected | dict2items }}'
+          loop_control:
+            label: 'Server : {{ item.key }}'
+
+        - name: Display inventory_server_locations
+          debug:
+            var: inventory_server_locations
+          loop: '{{ application_servers_selected | dict2items }}'
+          loop_control:
+            label: 'Server : {{ item.key }}'
+
+        - name: Display inventory_server_os
+          debug:
+            var: inventory_server_os
+          loop: '{{ application_servers_selected | dict2items }}'
+          loop_control:
+            label: 'Server : {{ item.key }}'
+
+
+        - name: Display inventory_server_providers
+          debug:
+            var: inventory_server_providers
+          loop: '{{ application_servers_selected | dict2items }}'
+          loop_control:
+            label: 'Server : {{ item.key }}'
+
+      tags:
+        - display
+
+    # -----------------------------------------------------------------------------
+    # Assert variables are defined
+    # -----------------------------------------------------------------------------
+    - name: Assert variables are defined
+      block:
+        - name: Assert variables are defined
+          assert:
+            that:
+              - inventory_server_roles is defined
+              - inventory_server_locations is defined
+              - inventory_server_os is defined
+              - inventory_server_providers is defined
+          loop: '{{ application_servers_selected | dict2items }}'
+          loop_control:
+            label: 'Server : {{ item.key }}'
+
+      tags:
+        - assert
+
+    # -----------------------------------------------------------------------------
+    # Populate inventories
+    # -----------------------------------------------------------------------------
+    - name: Populate inventories
+      block:
+        - set_fact:
+            inventory_all: >-
+                {{ inventory_all | default({})
+                  | combine( inventory, recursive=True)
+                }}
+          loop: '{{ application_servers_selected | dict2items }}'
+          loop_control:
+            label: 'Server : {{ item.key }}'
+
+        - debug:
+            var: inventory_all
+      tags:
+        - populate

@@ -34,3 +34,31 @@ all:
                         read_uat_2: {}
                         write_uat_1: {}
                         write_uat_2: {}
+        os:
+            children:
+                windows:
+                    children:
+                        win2k16:
+                            hosts:
+                                database_uat_1: {}
+                                database_uat_2: {}
+                                front_uat_1: {}
+                                front_uat_2: {}
+                                read_uat_1: {}
+                                read_uat_2: {}
+                        win2k19:
+                            hosts:
+                                write_uat_1: {}
+                                write_uat_2: {}
+        providers:
+            children:
+                azure:
+                    hosts:
+                        database_uat_1: {}
+                        database_uat_2: {}
+                        front_uat_1: {}
+                        front_uat_2: {}
+                        read_uat_1: {}
+                        read_uat_2: {}
+                        write_uat_1: {}
+                        write_uat_2: {}
