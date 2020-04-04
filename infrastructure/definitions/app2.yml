@@ -30,22 +30,6 @@ application:
       server_cpu:    1
       server_memory: 8192
 
-    write_api:
-      server_cpu:    8
-      server_memory: 8192
-      server_os:     win2k19
-
-    database:
-      server_cpu:    8
-      server_memory: 16384
-      server_disk:
-        - drive_letter: 'c:'
-          capacity:     100
-        - drive_letter: 'd:'
-          capacity:     1000
-        - drive_letter: 'e:'
-          capacity:     1000
-
   locations:
     # type specification
     europe:
@@ -54,32 +38,7 @@ application:
           server_subnet: 192.168.1.0/24
         read_api:
           server_subnet: 192.168.2.0/24
-        write_api:
-          server_subnet: 192.168.3.0/24
-        database:
-          server_subnet: 192.168.4.0/24
 
-    us:
-      roles:
-        front_web:
-          server_subnet: 192.169.1.0/24
-        read_api:
-          server_subnet: 192.169.2.0/24
-        write_api:
-          server_subnet: 192.169.3.0/24
-        database:
-          server_subnet: 192.169.4.0/24
-
-    asia:
-      roles:
-        front_web:
-          server_subnet: 192.170.1.0/24
-        read_api:
-          server_subnet: 192.170.2.0/24
-        write_api:
-          server_subnet: 192.170.3.0/24
-        database:
-          server_subnet: 192.170.4.0/24
 
 environments:
   dev:
@@ -103,15 +62,8 @@ environments:
       read_dev_1:
         server_location: europe
         server_role:     read_api
-      write_dev_1:
-        server_location: europe
-        server_role:     write_api
-      database_dev_1:
-        server_location: europe
-        server_role:     database
 
   uat:
-
     locations:
       # type specification
       europe:
@@ -120,17 +72,10 @@ environments:
             server_subnet: 192.161.1.0/24
           read_api:
             server_subnet: 192.161.2.0/24
-          write_api:
-            server_subnet: 192.161.3.0/24
-          database:
-            server_subnet: 192.161.4.0/24
 
     servers:
       # type specification
       front_uat_1:
-        server_location: europe
-        server_role:     front_web
-      front_uat_2:
         server_location: europe
         server_role:     front_web
       read_uat_1:
@@ -139,15 +84,3 @@ environments:
       read_uat_2:
         server_location: europe
         server_role:     read_api
-      write_uat_1:
-        server_location: europe
-        server_role:     write_api
-      write_uat_2:
-        server_location: europe
-        server_role:     write_api
-      database_uat_1:
-        server_location: europe
-        server_role:     database
-      database_uat_2:
-        server_location: europe
-        server_role:     database

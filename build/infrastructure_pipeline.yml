@@ -5,77 +5,161 @@ trigger:
     - infra/*
   paths:
     include:
-    - infrastructure/*
+    - infrastructure/definitions/*
+    - build/infrastructure_pipeline.yml
     exclude:
     - /**/*.md
 
 jobs:
-- job: BuildInfrastructure
+
+# -----------------------------------------------------------------------------
+# IdentifyApplications
+# -----------------------------------------------------------------------------
+- job: IdentifyApplications
   pool:
     vmImage: 'Ubuntu-16.04'
 
   steps:
 
-  # Checkout the repository and keep git credential
-  - checkout:           self
-    clean:              true
-    submodules:         true
-    persistCredentials: true
+    - task: Bash@3
+      inputs:
+          targetType:       'inline'
+          workingDirectory: 'tools/ansible'
+          script: |
+            echo "***************************************************************"
+            export
+            echo "***************************************************************"
+            echo "***************************************************************"
 
-  - task: Bash@3
-    inputs:
-        targetType:       'inline'
-        workingDirectory: 'tools/ansible'
-        script: |
-          export
-    displayName: 'Export variables'
+            # git diff-tree --no-commit-id --name-only -r $BUILD_SOURCEVERSION
+            branch_name=$(echo "$BUILD_SOURCEBRANCH" | sed "s/refs\/heads\///")
+            git checkout -b $branch_name
+            # git branch --set-upstream-to=origin/$branch_name $branch_name
 
+            git diff --name-only origin/master $branch_name
 
-  - task: UsePythonVersion@0
-    inputs:
-        versionSpec:  '2.7'
-        architecture: 'x64'
+            # modifications=$(git diff-tree --no-commit-id --name-only -r $BUILD_SOURCEVERSION)
+            modifications=$(git diff --name-only origin/master $branch_name)
 
-  # - task: AzureKeyVault@1
-  #   inputs:
-  #     azureSubscription: 'Visual Studio Enterprise (62177529-73f0-4e11-a584-5d3526dc6999)'
-  #     keyVaultName:  'mesfVault'
-  #     secretsFilter: 'Ansible-Automation'
+            echo "***************************************************************"
+            echo "modifications : $modifications"
+            echo "***************************************************************"
+            for file in $modifications
+            do
+              echo "Found file : $file"
+              directory=($dirname "$file")
+              if [[ $directory == *"infrastructure/definitions"* ]]; then
+                application_name=$(basename $file .yml)
+                echo "Found application definition : $application_name"
+                applications=$applications,"'$application_name':{'application_name':'$application_name'}"
+              fi
+            done
 
-  - task: Bash@3
-    inputs:
-        targetType: 'inline'
-        script: |
-          python -m pip install --upgrade pip setuptools wheel
-          python -m pip install virtualenv
-          python -m virtualenv ansible-2.9.6
-          source ansible-2.9.6/bin/activate
-          python -m pip install -r tools/ansible/venv_requirements.txt
-          sudo apt-get install dos2unix
-    displayName: 'Install tools'
+            if [[ -z "$applications" ]]; then
+              echo "No application definiton modified"
+              exit 1
+            else
+              applications=${applications:1}
+              applications={$applications}
+              echo "Matrix variables : $applications"
+              echo "##vso[task.setvariable variable=applications;isOutput=true]$applications"
+            fi
 
-  - task: Bash@3
-    inputs:
-        targetType:       'inline'
-        workingDirectory: 'tools/ansible'
-        script: |
-          source ../../ansible-2.9.6/bin/activate
-          ansible-playbook 00-generate-application-servers.yml -e application=app1
-    displayName: 'Execute ansible'
-    condition:   and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+            echo "***************************************************************"
+            export
+      name:        'GetMatrixVariables'
+      displayName: 'Export variables'
 
-  - task: Bash@3
-    inputs:
-        targetType:       'inline'
-        workingDirectory: '.'
-        script: |
-          git config --global user.email "you@example.com"
-          git config --global user.name "Your Name"
-          git checkout -b infra/app1
-          git ls-files infrastructure/generated -o --exclude-standard | xargs -i git add '{}'
-          git add infrastructure/generated
-          git status
-          git commit -m "Automatic Generated servers [skip ci]"
-          git push --set-upstream origin infra/app1
-    displayName: 'Commit application server generations'
-    condition:   and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+# -----------------------------------------------------------------------------
+# BuildInfrastructure
+# -----------------------------------------------------------------------------
+- job: BuildInfrastructure
+  pool:
+    vmImage: 'Ubuntu-16.04'
+  dependsOn: IdentifyApplications
+  strategy:
+    matrix: $[ dependencies.IdentifyApplications.outputs['GetMatrixVariables.applications'] ]
+
+  steps:
+
+    # Checkout the repository and keep git credential
+    - checkout:           self
+      clean:              true
+      submodules:         true
+      persistCredentials: true
+
+    - task: UsePythonVersion@0
+      inputs:
+          versionSpec:  '2.7'
+          architecture: 'x64'
+
+    # - task: AzureKeyVault@1
+    #   inputs:
+    #     azureSubscription: 'Visual Studio Enterprise (62177529-73f0-4e11-a584-5d3526dc6999)'
+    #     keyVaultName:  'mesfVault'
+    #     secretsFilter: 'Ansible-Automation'
+
+    - task: Bash@3
+      inputs:
+          targetType: 'inline'
+          script: |
+            python -m pip install --upgrade pip setuptools wheel
+            python -m pip install virtualenv
+            python -m virtualenv ansible-2.9.6
+            source ansible-2.9.6/bin/activate
+            python -m pip install -r tools/ansible/venv_requirements.txt
+            sudo apt-get install dos2unix
+      displayName: 'Install tools'
+
+    # Convert files dos2unix
+    - task: Bash@3
+      inputs:
+          targetType: 'inline'
+          workingDirectory: infrastructure/definitions
+          script: |
+            # find infrastructure/definitions/ -type f -not -path '*/\.*' -exec grep -Il '.' {} \; | xargs -d '\n' -L 1 dos2unix -k
+            dos2unix $(application_name).yml
+      displayName: 'Convert files dos2unix'
+
+    # yaml lint ansible code
+    - task: Bash@3
+      inputs:
+          targetType: 'inline'
+          workingDirectory: infrastructure/definitions
+          script: |
+            source ../../ansible-2.9.6/bin/activate
+            yamllint -c ../.yamllint $(application_name).yml
+      displayName: 'Yaml lint'
+
+    - task: Bash@3
+      inputs:
+          targetType:       'inline'
+          workingDirectory: 'tools/ansible'
+          script: |
+            source ../../ansible-2.9.6/bin/activate
+            ansible-playbook -i localhost,k 00-generate-application-servers.yml -e application=$(application_name)
+      displayName: 'Execute ansible'
+
+    - task: Bash@3
+      inputs:
+          targetType:       'inline'
+          workingDirectory: '.'
+          script: |
+            git config --global user.email "you@example.com"
+            git config --global user.name "Your Name"
+            branch_name=$(echo "$BUILD_SOURCEBRANCH" | sed "s/refs\/heads\///")
+            echo "***************************************************************"
+            echo "Current branch : $branch_name"
+            echo "***************************************************************"
+
+            git checkout -b $branch_name
+            git branch --set-upstream-to=origin/$branch_name $branch_name
+
+            git ls-files infrastructure/generated -o --exclude-standard | xargs -i git add '{}'
+            git add infrastructure/generated
+            git status
+            git commit -m "Automatic Generated servers [skip ci]"
+            git pull
+            git push --set-upstream origin $branch_name
+      displayName: 'Commit application server generations'
+      condition:   and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))

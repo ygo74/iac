@@ -1,0 +1,24 @@
+---
+all: # keys must be unique, i.e. only one 'hosts' per group
+    children:   # key order does not matter, indentation does
+        applications:
+          children:
+            app1:
+              hosts:
+                  test1:
+                  test2:
+        europe:
+            hosts:
+              test1:
+        us:
+            hosts:
+              test2:
+
+        windows:
+            hosts:
+              test1:
+              test2:
+        azure:
+          hosts:
+            test1:
+            test2:

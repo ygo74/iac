@@ -1,0 +1,69 @@
+digraph "front_dev_1" {
+  rankdir=TB;
+
+  "all" [shape=record label=<
+<table border="0" cellborder="0">
+  <tr><td><b>
+  <font face="Times New Roman, Bold" point-size="16">all</font>
+  </b></td></tr>
+</table>
+>]
+  "app1" [shape=record label=<
+<table border="0" cellborder="0">
+  <tr><td><b>
+  <font face="Times New Roman, Bold" point-size="16">app1</font>
+  </b></td></tr>
+</table>
+>]
+  "applications" [shape=record label=<
+<table border="0" cellborder="0">
+  <tr><td><b>
+  <font face="Times New Roman, Bold" point-size="16">applications</font>
+  </b></td></tr>
+</table>
+>]
+  "europe" [shape=record label=<
+<table border="0" cellborder="0">
+  <tr><td><b>
+  <font face="Times New Roman, Bold" point-size="16">europe</font>
+  </b></td></tr>
+</table>
+>]
+  "front_dev_1" [shape=record style=rounded label=<
+<table border="0" cellborder="0">
+  <tr><td><b>
+  <font face="Times New Roman, Bold" point-size="16">front_dev_1</font>
+  </b></td></tr>
+</table>
+>]
+  "front_web" [shape=record label=<
+<table border="0" cellborder="0">
+  <tr><td><b>
+  <font face="Times New Roman, Bold" point-size="16">front_web</font>
+  </b></td></tr>
+</table>
+>]
+  "front_web_europe" [shape=record label=<
+<table border="0" cellborder="0">
+  <tr><td><b>
+  <font face="Times New Roman, Bold" point-size="16">front_web_europe</font>
+  </b></td></tr>
+</table>
+>]
+  "locations" [shape=record label=<
+<table border="0" cellborder="0">
+  <tr><td><b>
+  <font face="Times New Roman, Bold" point-size="16">locations</font>
+  </b></td></tr>
+</table>
+>]
+
+  "all" -> "applications";
+  "all" -> "locations";
+  "app1" -> "front_web";
+  "applications" -> "app1";
+  "europe" -> "front_web_europe";
+  "front_web" -> "front_web_europe";
+  "front_web_europe" -> "front_dev_1";
+  "locations" -> "europe";
+}
