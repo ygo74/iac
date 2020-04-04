@@ -1,0 +1,20 @@
+---
+# Ansible managed
+all:
+    children:
+        applications:
+            children:
+                app2:
+                    children:
+                        front_web:
+                            hosts:
+                                front_dev_1: {}
+                        read_api:
+                            hosts:
+                                read_dev_1: {}
+        locations:
+            children:
+                europe:
+                    hosts:
+                        front_dev_1: {}
+                        read_dev_1: {}
