@@ -66,6 +66,17 @@
                           "hosts": inventory_server_locations
                         }
                   }
+                },
+                "os": {
+                  "children": {
+                    item.value.server_os_familly: {
+                      "children": {
+                        item.value.server_os: {
+                          "hosts": inventory_server_os
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -74,24 +85,33 @@
       }}
 
 
-    # application_servers_selected:
-    #   test1:
-    #     server_environment: dev
-    #     server_role: r1
-    #     server_location: europe
-    #   test2:
-    #     server_environment: dev
-    #     server_role: r1
-    #     server_location: us
-    #   test3:
-    #     server_environment: uat
-    #     server_role: r1
-    #     server_location: europe
-    #   test4:
-    #     server_environment: uat
-    #     server_role: r1
-    #     server_location: europe
+    application_servers_selected:
+      test1:
+        server_environment: dev
+        server_role: r1
+        server_location: europe
+        server_os_familly: windows
+        server_os: win2k16
+      test2:
+        server_environment: dev
+        server_role: r1
+        server_location: us
+        server_os_familly: windows
+        server_os: win2k19
+      test3:
+        server_environment: dev
+        server_role: r1
+        server_location: europe
+        server_os_familly: linux
+        server_os: rhel75
+      test4:
+        server_environment: uat
+        server_role: r1
+        server_location: europe
+        server_os_familly: linux
+        server_os: rhel75
 
+    # servers in application roles
     inventory_server_roles: >-
       {%- set servers=application_servers_selected | dict2items
                         | json_query("[?value.server_environment=='" + item.value.server_environment + "'
@@ -103,6 +123,7 @@
       {%- endfor -%}
       {{ servers_dict }}
 
+    # servers in application locations
     inventory_server_locations: >-
       {%- set servers=application_servers_selected | dict2items
                         | json_query("[?value.server_environment=='" + item.value.server_environment + "'
@@ -114,6 +135,17 @@
       {%- endfor -%}
       {{ servers_dict }}
 
+    # servers for operating systems
+    inventory_server_os: >-
+      {%- set servers=application_servers_selected | dict2items
+                        | json_query("[?value.server_environment=='" + item.value.server_environment + "'
+                                       && value.server_os=='" + item.value.server_os + "'].{key: key, value: value}")
+      -%}
+      {%- set servers_dict={} -%}
+      {%- for server in servers -%}
+        {%- do servers_dict.update({ server.key: {} }) -%}
+      {%- endfor -%}
+      {{ servers_dict }}
 
   tasks:
 
