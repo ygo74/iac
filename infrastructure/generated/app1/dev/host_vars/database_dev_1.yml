@@ -12,5 +12,7 @@ server_environment: dev
 server_location: europe
 server_memory: 4096
 server_os: win2k16
+server_os_familly: windows
+server_provider: azure
 server_role: database
 server_subnet: 192.160.1.0/24
