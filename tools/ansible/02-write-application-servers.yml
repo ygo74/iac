@@ -123,14 +123,11 @@
     #                     | json_query("[?value.server_environment=='" + "dev" + "'
     #                                    && value.server_role=='" + "r1" + "'].{key: key, value: value}")
 
-
-
     # - debug:
     #     var: inventory_server_locations
     #   loop: '{{ application_servers_selected | dict2items }}'
 
     # - fail:
-
 
     # -----------------------------------------------------------------------------
     # Assert playbook execution
