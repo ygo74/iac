@@ -10,5 +10,7 @@ server_environment: uat
 server_location: europe
 server_memory: 8192
 server_os: win2k16
+server_os_familly: windows
+server_provider: azure
 server_role: read_api
 server_subnet: 192.161.2.0/24
