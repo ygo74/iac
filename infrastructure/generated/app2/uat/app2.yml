@@ -6,17 +6,23 @@ all:
             children:
                 app2:
                     children:
-                        front_web:
+                        r1:
                             hosts:
-                                front_uat_1: {}
-                        read_api:
-                            hosts:
-                                read_uat_1: {}
-                                read_uat_2: {}
+                                test4: {}
         locations:
             children:
                 europe:
                     hosts:
-                        front_uat_1: {}
-                        read_uat_1: {}
-                        read_uat_2: {}
+                        test4: {}
+        os:
+            children:
+                linux:
+                    children:
+                        rhel75:
+                            hosts:
+                                test4: {}
+        providers:
+            children:
+                rhev:
+                    hosts:
+                        test4: {}

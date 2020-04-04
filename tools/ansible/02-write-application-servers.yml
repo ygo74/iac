@@ -67,6 +67,13 @@
                         }
                   }
                 },
+                "providers": {
+                  "children": {
+                        item.value.server_provider: {
+                          "hosts": inventory_server_providers
+                        }
+                  }
+                },
                 "os": {
                   "children": {
                     item.value.server_os_familly: {
@@ -92,24 +99,28 @@
         server_location: europe
         server_os_familly: windows
         server_os: win2k16
+        server_provider: azure
       test2:
         server_environment: dev
         server_role: r1
         server_location: us
         server_os_familly: windows
         server_os: win2k19
+        server_provider: azure
       test3:
         server_environment: dev
         server_role: r1
         server_location: europe
         server_os_familly: linux
         server_os: rhel75
+        server_provider: vmware
       test4:
         server_environment: uat
         server_role: r1
         server_location: europe
         server_os_familly: linux
         server_os: rhel75
+        server_provider: rhev
 
     # servers in application roles
     inventory_server_roles: >-
@@ -147,6 +158,18 @@
       {%- endfor -%}
       {{ servers_dict }}
 
+    # servers for providers
+    inventory_server_providers: >-
+      {%- set servers=application_servers_selected | dict2items
+                        | json_query("[?value.server_environment=='" + item.value.server_environment + "'
+                                       && value.server_provider=='" + item.value.server_provider + "'].{key: key, value: value}")
+      -%}
+      {%- set servers_dict={} -%}
+      {%- for server in servers -%}
+        {%- do servers_dict.update({ server.key: {} }) -%}
+      {%- endfor -%}
+      {{ servers_dict }}
+
   tasks:
 
     # - debug:
@@ -174,33 +197,43 @@
             fail_msg: "Missing mandatory variables"
 
 
-    - set_fact:
-        inventory_all: >-
-             {{ inventory_all | default({})
-               | combine( inventory, recursive=True)
-             }}
-      loop: '{{ application_servers_selected | dict2items }}'
+    # -----------------------------------------------------------------------------
+    # Populate inventories
+    # -----------------------------------------------------------------------------
+    - name: Populate inventories
+      block:
+        - set_fact:
+            inventory_all: >-
+                {{ inventory_all | default({})
+                  | combine( inventory, recursive=True)
+                }}
+          loop: '{{ application_servers_selected | dict2items }}'
+          loop_control:
+            label: 'Server : {{ item.key }}'
 
-    - debug:
-        var: inventory_all
+        - debug:
+            var: inventory_all
+            verbosity: 4
 
     # -----------------------------------------------------------------------------
     # write servers output structure
     # -----------------------------------------------------------------------------
     - name: write servers output structure
       block:
-        # write application folder
-        - name: write application folder
-          file:
-            path:  '{{ application_servers_path }}'
-            state: 'directory'
+        # # write application folder
+        # - name: write application folder
+        #   file:
+        #     path:  '{{ application_servers_path }}'
+        #     state: 'directory'
 
-        # write application inventory folder
-        - name: write application inventory folder
-          file:
-            path:  '{{ application_servers_path }}/{{ item.key }}'
-            state: 'directory'
-          loop: '{{ inventory_all | dict2items }}'
+        # # write application inventory folder
+        # - name: write application inventory folder
+        #   file:
+        #     path:  '{{ application_servers_path }}/{{ item.key }}'
+        #     state: 'directory'
+        #   loop: '{{ inventory_all | dict2items }}'
+        #   loop_control:
+        #     lable: 'Environment : {{ item.key }}'
 
         # write application inventory host_vars folder
         - name: write application inventory host_vars folder
@@ -208,6 +241,8 @@
             path:  '{{ application_servers_path }}/{{ item.key }}/host_vars'
             state: 'directory'
           loop: '{{ inventory_all | dict2items }}'
+          loop_control:
+            label: 'Environment : {{ item.key }}'
 
         # Write servers hostvars
         - name: write servers
@@ -215,6 +250,8 @@
             dest: '{{ application_servers_path }}/{{ item.value.server_environment }}/host_vars/{{ item.key }}.yml'
             src:  'server_definition.yml.j2'
           loop: '{{ application_servers_selected | dict2items }}'
+          loop_control:
+            label: 'Server : {{ item.key }}'
 
 
         # Write Inventory
@@ -223,3 +260,5 @@
             dest: '{{ application_servers_path }}/{{ item.key }}/{{ application }}.yml'
             src:  'application_inventory.yml.j2'
           loop: '{{ inventory_all | dict2items }}'
+          loop_control:
+            label: 'Server : {{ item.key }}'
