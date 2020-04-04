@@ -258,7 +258,3 @@
           vars:
             server_os_familly: '{{ os_allowed_values[item.value.server_os] | default() }}'
             server_provider:   '{{ vm_provider[item.value.server_location][server_os_familly] }}'
-
-
-
-
