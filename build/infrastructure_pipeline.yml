@@ -158,7 +158,8 @@ jobs:
             git ls-files infrastructure/generated -o --exclude-standard | xargs -i git add '{}'
             git add infrastructure/generated
             git status
-            git commit -m "Automatic Generated servers [skip ci]"
+            # git commit -m "Automatic Generated servers [skip ci]"
+            git commit -m "Automatic Generated servers"
             git pull
             git push --set-upstream origin $branch_name
       displayName: 'Commit application server generations'
