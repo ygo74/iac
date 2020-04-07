@@ -87,9 +87,8 @@ jobs:
             fi
 
             echo "***************************************************************"
-            export
       name:        'GetMatrixVariables'
-      displayName: 'Export variables'
+      displayName: 'Init Application Matrix'
 
 # -----------------------------------------------------------------------------
 # BuildInfrastructure
