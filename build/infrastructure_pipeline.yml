@@ -37,7 +37,8 @@ jobs:
             git checkout -b $branch_name
             # git branch --set-upstream-to=origin/$branch_name $branch_name
 
-            # identify commit
+            # identify comparaison
+            refCompare="origin/master"
             if [[ $branch_name == *"master"* ]]; then
               # Current branch is master
                echo "Current branch is master"
@@ -45,24 +46,25 @@ jobs:
                if [[ -z "$existingTag" ]]; then
                     # No tag exists, find modification from first commit in master
                     echo "No tag exists, find modification from first commit in master"
-                    firstCommit=$(git log master --pretty=format:"%H"  | tail -1)
-                    modifications=$(git diff --name-only $firstCommit $branch_name)
+                    refCompare=$(git log master --pretty=format:"%H"  | tail -1)
                else
                     # Tag exists, find modification from last tag $existingTag
                     echo "Tag exists, find modification from last tag $existingTag"
-                    modifications=$(git diff --name-only $existingTag $branch_name)
+                    refCompare=$existingTag
                fi
             else
               # Current branch is not master
               echo "Current branch is not master : $branch_name"
-              echo "Find Modifications between branch $branch_name and master"
-              git diff --name-only origin/master $branch_name
-              modifications=$(git diff --name-only origin/master $branch_name)
             fi
 
+            # Find modifications in application definition
+            echo "Find Modifications between $refCompare and $branch_name"
+            modifications=$(git diff --name-only $refCompare $branch_name | grep infrastructure/definitions)
             echo "***************************************************************"
             echo "modifications : $modifications"
             echo "***************************************************************"
+
+            # Init applications matrix for the build
             for file in $modifications
             do
               echo "Found file : $file"
