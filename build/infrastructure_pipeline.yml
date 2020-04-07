@@ -38,6 +38,7 @@ jobs:
 
             # identify commit
             if [[ $branch_name == *"master"* ]]; then
+              # Current branch is master
                echo "Current branch is master"
                existingTags=$(git tag)
                if [[ -z "$existingTags"]]; then
@@ -52,7 +53,8 @@ jobs:
                   echo "Tag exists, find modification from last tags"
 
                fi
-            elif
+            else
+              # Current branch is not master
               echo "Current branch is not master : $branch_name"
               echo "Find Modifications between branch $branch_name and master"
               git diff --name-only origin/master $branch_name
