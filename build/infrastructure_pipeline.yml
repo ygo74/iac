@@ -41,13 +41,16 @@ jobs:
             if [[ $branch_name == *"master"* ]]; then
               # Current branch is master
                echo "Current branch is master"
-               existingTags=$(git tag)
-               if [[ -z "$existingTags" ]]; then
+               existingTag=$(git tag -l --sort=-v:refname | tail -1 )
+               if [[ -z "$existingTag" ]]; then
+                    # No tag exists, find modification from first commit in master
                     echo "No tag exists, find modification from first commit in master"
                     firstCommit=$(git log master --pretty=format:"%H"  | tail -1)
                     modifications=$(git diff --name-only $firstCommit $branch_name)
                else
-                  echo "Tag exists, find modification from last tags"
+                    # Tag exists, find modification from last tag $existingTag
+                    echo "Tag exists, find modification from last tag $existingTag"
+                    modifications=$(git diff --name-only $existingTag $branch_name)
                fi
             else
               # Current branch is not master
