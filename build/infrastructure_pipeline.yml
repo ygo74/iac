@@ -181,4 +181,7 @@ jobs:
             git pull
             git push --set-upstream origin $branch_name
       displayName: 'Commit application server generations'
-      condition:   and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+      condition:   and(succeeded(),
+                        ne(variables['Build.Reason'], 'PullRequest'),
+                        ne(variables['Build.SourceBranchName'], 'master')
+                      )
