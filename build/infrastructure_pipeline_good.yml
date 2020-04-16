@@ -160,22 +160,6 @@ jobs:
             ansible-playbook -i localhost,k 00-generate-application-servers.yml -e application=$(application_name)
       displayName: 'Execute ansible'
 
-# -----------------------------------------------------------------------------
-# Synchronize result
-# -----------------------------------------------------------------------------
-- job: SyncInventory
-  pool:
-    vmImage: 'Ubuntu-16.04'
-  dependsOn: BuildInfrastructure
-
-  steps:
-
-    # Checkout the repository and keep git credential
-    - checkout:           self
-      clean:              true
-      submodules:         true
-      persistCredentials: true
-
     - task: Bash@3
       inputs:
           targetType:       'inline'
