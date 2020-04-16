@@ -187,6 +187,11 @@ jobs:
       submodules:         true
       persistCredentials: true
 
+    - task: DownloadBuildArtifacts@0
+      displayName: 'Download Build Artifacts'
+      inputs:
+        downloadPath: 'infrastructure/generated'
+
     - task: Bash@3
       inputs:
           targetType:       'inline'
