@@ -4,7 +4,7 @@ server_cpu: 4
 server_disk:
 -   capacity: 100
     drive_letter: 'c:'
--   capacity: 28
+-   capacity: 50
     drive_letter: 'd:'
 server_environment: uat
 server_location: europe
