@@ -1,3 +1,4 @@
+---
 trigger:
   batch: true
   branches:
@@ -12,11 +13,58 @@ trigger:
     - /**/*.md
 
 jobs:
+# -----------------------------------------------------------------------------
+# IdentifyNextVersion
+# -----------------------------------------------------------------------------
+- job: IdentifyNextVersion
+  pool:
+    vmImage: 'Ubuntu-16.04'
+
+  steps:
+
+    - task: Bash@3
+      displayName: 'Identify Next Version'
+      inputs:
+          targetType:       'inline'
+          workingDirectory: 'tools/ansible'
+          script: |
+            echo "***************************************************************"
+            echo "Read version Major.Minor in version.yml"
+            echo "***************************************************************"
+
+            mainVersion=$(grep -oP "^version: \K(\d+\.)\d+$" infrastructure/version.yml)
+            if [[ -z "$mainVersion" ]]; then
+              echo "No Main version (version: Major.minor) provided in infrastructure/version.yml"
+              exit 1
+            fi
+
+            echo "***************************************************************"
+            echo "Find latest tag for pattern $mainVersion"
+            echo "***************************************************************"
+            lastTag=$(git tag -l "${mainVersion}*" --sort=v:refname | tail -1 )
+
+            if [[ -z "$lastTag" ]]; then
+               echo "No Last Tag exist for pattern $mainVersion"
+               nextVersion="${mainVersion}.0"
+            else
+               echo "Last Tag exist for pattern $mainVersion : $lastTag"
+               nextVersion=$(echo $lastTag  | awk -F"." 'BEGIN{OFS=".";} {$NF+=1; print $0}')
+            fi
+            echo "Next version is : $nextVersion"
+
+            if [[ -z "$nextVersion" ]]; then
+              echo "No next version found!!!"
+              exit 1
+            fi
+
+            echo "##vso[build.updatebuildnumber]$nextVersion"
+
 
 # -----------------------------------------------------------------------------
 # IdentifyApplications
 # -----------------------------------------------------------------------------
 - job: IdentifyApplications
+  dependsOn: IdentifyNextVersion
   pool:
     vmImage: 'Ubuntu-16.04'
 
