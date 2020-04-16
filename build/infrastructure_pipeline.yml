@@ -159,13 +159,13 @@ jobs:
           workingDirectory: 'tools/ansible'
           script: |
             source ../../ansible-2.9.6/bin/activate
-            ansible-playbook -i localhost,k 00-generate-application-servers.yml -e application=$(application_name) -e application_servers_path='$(System.DefaultWorkingDirectory)'
+            ansible-playbook -i localhost,k 00-generate-application-servers.yml -e application=$(application_name) -e application_servers_path='$(Build.ArtifactStagingDirectory)'
       displayName: 'Execute ansible'
 
 
     - task: PublishBuildArtifacts@1
       inputs:
-        pathtoPublish: '$(System.DefaultWorkingDirectory)'
+        pathtoPublish: '$(Build.ArtifactStagingDirectory)'
         artifactName:  '$(application_name)'
 
 
