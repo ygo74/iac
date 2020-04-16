@@ -57,7 +57,7 @@ jobs:
             echo "Next version is : $nextVersion"
 
             if [[ -z "$nextVersion" ]]; then
-              echo "No next version found!!!"
+              echo "##vso[task.logissue type=error]No next version found!!!"
               exit 1
             fi
 
@@ -68,6 +68,7 @@ jobs:
 # IdentifyApplications
 # -----------------------------------------------------------------------------
 - job: IdentifyApplications
+  displayName: "Identify applications'definition updated or created"
   dependsOn: IdentifyNextVersion
   pool:
     vmImage: 'Ubuntu-16.04'
@@ -129,7 +130,7 @@ jobs:
             done
 
             if [[ -z "$applications" ]]; then
-              echo "No application definiton modified"
+              echo "##vso[task.logissue type=error]No application definiton modified"
               exit 1
             else
               applications=${applications:1}
@@ -146,6 +147,7 @@ jobs:
 # BuildInfrastructure
 # -----------------------------------------------------------------------------
 - job: BuildInfrastructure
+  displayName: "Build Application infrastructure"
   pool:
     vmImage: 'Ubuntu-16.04'
   dependsOn: IdentifyApplications
@@ -225,6 +227,7 @@ jobs:
 # Synchronize result
 # -----------------------------------------------------------------------------
 - job: SyncInventory
+  displayName: "Synchornize generated inventories"
   pool:
     vmImage: 'Ubuntu-16.04'
   dependsOn: BuildInfrastructure
