@@ -97,6 +97,8 @@ jobs:
   pool:
     vmImage: 'Ubuntu-16.04'
   dependsOn: IdentifyApplications
+  workspace:
+    clean: all
   strategy:
     matrix: $[ dependencies.IdentifyApplications.outputs['GetMatrixVariables.applications'] ]
 
@@ -157,8 +159,15 @@ jobs:
           workingDirectory: 'tools/ansible'
           script: |
             source ../../ansible-2.9.6/bin/activate
-            ansible-playbook -i localhost,k 00-generate-application-servers.yml -e application=$(application_name)
+            ansible-playbook -i localhost,k 00-generate-application-servers.yml -e application=$(application_name) -e application_servers_path='$(System.DefaultWorkingDirectory)'
       displayName: 'Execute ansible'
+
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        pathtoPublish: '$(System.DefaultWorkingDirectory)'
+        artifactName:  '$(application_name)'
+
 
 # -----------------------------------------------------------------------------
 # Synchronize result
@@ -167,6 +176,8 @@ jobs:
   pool:
     vmImage: 'Ubuntu-16.04'
   dependsOn: BuildInfrastructure
+  workspace:
+    clean: all
 
   steps:
 
