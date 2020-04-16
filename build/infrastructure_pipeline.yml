@@ -191,6 +191,7 @@ jobs:
       displayName: 'Download Build Artifacts'
       inputs:
         downloadPath: 'infrastructure/generated'
+        downloadType: 'all'
 
     - task: Bash@3
       inputs:
