@@ -20,6 +20,7 @@ jobs:
 # IdentifyNextVersion
 # -----------------------------------------------------------------------------
 - job: IdentifyNextVersion
+  displayName: "Identify Next version from tags"
   pool:
     vmImage: 'Ubuntu-16.04'
 
@@ -37,7 +38,7 @@ jobs:
 
             mainVersion=$(grep -oP "^version: \K(\d+\.)\d+$" infrastructure/version.yml)
             if [[ -z "$mainVersion" ]]; then
-              echo "No Main version (version: Major.minor) provided in infrastructure/version.yml"
+              echo "##vso[task.logissue type=error]No Main version (version: Major.minor) provided in infrastructure/version.yml"
               exit 1
             fi
 
