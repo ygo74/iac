@@ -26,7 +26,7 @@ jobs:
       displayName: 'Identify Next Version'
       inputs:
           targetType:       'inline'
-          workingDirectory: 'tools/ansible'
+          workingDirectory: '.'
           script: |
             echo "***************************************************************"
             echo "Read version Major.Minor in version.yml"
