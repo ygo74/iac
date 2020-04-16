@@ -232,6 +232,14 @@ jobs:
 
   steps:
 
+    - task: Bash@3
+      inputs:
+          targetType:       'inline'
+          workingDirectory: '.'
+          script: |
+            echo "$BUILD_BUILDNUMBER"
+
+
     # Checkout the repository and keep git credential
     - checkout:           self
       clean:              true
