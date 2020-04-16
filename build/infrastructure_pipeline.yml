@@ -12,6 +12,9 @@ trigger:
     exclude:
     - /**/*.md
 
+variables:
+  runNumber: $[counter(variables['build.reason'], 0)]
+
 jobs:
 # -----------------------------------------------------------------------------
 # IdentifyNextVersion
@@ -57,7 +60,7 @@ jobs:
               exit 1
             fi
 
-            echo "##vso[build.updatebuildnumber]$nextVersion"
+            echo "##vso[build.updatebuildnumber]$nextVersion-r$(runNumber)"
 
 
 # -----------------------------------------------------------------------------
