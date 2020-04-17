@@ -12,6 +12,17 @@ trigger:
     exclude:
     - /**/*.md
 
+pr:
+  autoCancel: true
+  branches:
+    include:
+    - master
+  paths:
+    include:
+    - infrastructure/definitions/*
+    exclude:
+    - /**/*.md
+
 variables:
   runNumber: $[counter(variables['build.reason'], 0)]
 
