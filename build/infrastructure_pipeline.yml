@@ -227,21 +227,18 @@ jobs:
 # Synchronize result
 # -----------------------------------------------------------------------------
 - job: SyncInventory
-  displayName: "Synchornize generated inventories"
+  displayName: "Synchronize generated inventories"
   pool:
     vmImage: 'Ubuntu-16.04'
   dependsOn: BuildInfrastructure
   workspace:
     clean: all
+  condition:   and(succeeded(),
+                    ne(variables['Build.Reason'], 'PullRequest'),
+                    ne(variables['Build.SourceBranchName'], 'master')
+                  )
 
   steps:
-
-    - task: Bash@3
-      inputs:
-          targetType:       'inline'
-          workingDirectory: '.'
-          script: |
-            echo "$BUILD_BUILDNUMBER"
 
 
     # Checkout the repository and keep git credential
@@ -279,7 +276,52 @@ jobs:
             git pull
             git push --set-upstream origin $branch_name
       displayName: 'Commit application server generations'
-      condition:   and(succeeded(),
-                        ne(variables['Build.Reason'], 'PullRequest'),
-                        ne(variables['Build.SourceBranchName'], 'master')
-                      )
+
+# -----------------------------------------------------------------------------
+# Tag master build
+# -----------------------------------------------------------------------------
+- job: TagMaster
+  displayName: "Tag Master with new version $(Build.BuildNumber)"
+  pool:
+    vmImage: 'Ubuntu-16.04'
+  dependsOn: BuildInfrastructure
+  workspace:
+    clean: all
+  condition:   and(succeeded(),
+                    eq(variables['Build.SourceBranchName'], 'master')
+                  )
+
+  steps:
+
+    - task: Bash@3
+      inputs:
+          targetType:       'inline'
+          workingDirectory: '.'
+          script: |
+            echo "$BUILD_BUILDNUMBER"
+
+    # Checkout the repository and keep git credential
+    - checkout:           self
+      clean:              true
+      submodules:         true
+      persistCredentials: true
+
+    - task: Bash@3
+      inputs:
+          targetType:       'inline'
+          workingDirectory: '.'
+          script: |
+            git config --global user.email "you@example.com"
+            git config --global user.name "Your Name"
+            branch_name=$(echo "$BUILD_SOURCEBRANCH" | sed "s/refs\/heads\///")
+            echo "***************************************************************"
+            echo "Current branch : $branch_name"
+            echo "***************************************************************"
+
+            git checkout -b $branch_name
+            git branch --set-upstream-to=origin/$branch_name $branch_name
+
+            git tag $BUILD_BUILDNUMBER
+            git push origin --tags
+
+      displayName: 'Push Tag'
