@@ -7,7 +7,7 @@ Build status : [![Build Status](https://dev.azure.com/ygo74/iac/_apis/build/stat
 
 ## Application Definitions
 
-Application definition is defined at different levels :
+Application definition is defined at different levels :  
 => Global Application
 => Environment
 
@@ -36,3 +36,7 @@ format:
    When: Pull request is merged on master
    How: Bump patch version on the latest tag found for pattern Major.Minor
 
+
+### Questions
+1. Do we want to address fix on older version ?
+   If yes, we have to see how we merge fix for old version in master ? need to read version from version.yml file to compare master against last tags.
