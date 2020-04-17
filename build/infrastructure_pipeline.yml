@@ -43,6 +43,7 @@ jobs:
           targetType:       'inline'
           workingDirectory: '.'
           script: |
+            # Retrieve version defined in version.yml
             echo "***************************************************************"
             echo "Read version Major.Minor in version.yml"
             echo "***************************************************************"
@@ -53,6 +54,7 @@ jobs:
               exit 1
             fi
 
+            # Find latest tag for pattern Major.Minor defined in version.yml
             echo "***************************************************************"
             echo "Find latest tag for pattern $mainVersion"
             echo "***************************************************************"
@@ -70,6 +72,11 @@ jobs:
             if [[ -z "$nextVersion" ]]; then
               echo "##vso[task.logissue type=error]No next version found!!!"
               exit 1
+            fi
+
+            # Publish build Number with next tag version
+            if [[ $BUILD_SOURCEBRANCH != *"master"* ]]; then
+
             fi
 
             echo "##vso[build.updatebuildnumber]$nextVersion-r$(runNumber)"
