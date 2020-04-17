@@ -1,4 +1,3 @@
----
 trigger:
   batch: true
   branches:
@@ -12,64 +11,12 @@ trigger:
     exclude:
     - /**/*.md
 
-variables:
-  runNumber: $[counter(variables['build.reason'], 0)]
-
 jobs:
-# -----------------------------------------------------------------------------
-# IdentifyNextVersion
-# -----------------------------------------------------------------------------
-- job: IdentifyNextVersion
-  displayName: "Identify Next version from tags"
-  pool:
-    vmImage: 'Ubuntu-16.04'
-
-  steps:
-
-    - task: Bash@3
-      displayName: 'Identify Next Version'
-      inputs:
-          targetType:       'inline'
-          workingDirectory: '.'
-          script: |
-            echo "***************************************************************"
-            echo "Read version Major.Minor in version.yml"
-            echo "***************************************************************"
-
-            mainVersion=$(grep -oP "^version: \K(\d+\.)\d+$" infrastructure/version.yml)
-            if [[ -z "$mainVersion" ]]; then
-              echo "##vso[task.logissue type=error]No Main version (version: Major.minor) provided in infrastructure/version.yml"
-              exit 1
-            fi
-
-            echo "***************************************************************"
-            echo "Find latest tag for pattern $mainVersion"
-            echo "***************************************************************"
-            lastTag=$(git tag -l "${mainVersion}*" --sort=v:refname | tail -1 )
-
-            if [[ -z "$lastTag" ]]; then
-               echo "No Last Tag exist for pattern $mainVersion"
-               nextVersion="${mainVersion}.0"
-            else
-               echo "Last Tag exist for pattern $mainVersion : $lastTag"
-               nextVersion=$(echo $lastTag  | awk -F"." 'BEGIN{OFS=".";} {$NF+=1; print $0}')
-            fi
-            echo "Next version is : $nextVersion"
-
-            if [[ -z "$nextVersion" ]]; then
-              echo "##vso[task.logissue type=error]No next version found!!!"
-              exit 1
-            fi
-
-            echo "##vso[build.updatebuildnumber]$nextVersion-r$(runNumber)"
-
 
 # -----------------------------------------------------------------------------
 # IdentifyApplications
 # -----------------------------------------------------------------------------
 - job: IdentifyApplications
-  displayName: "Identify applications'definition updated or created"
-  dependsOn: IdentifyNextVersion
   pool:
     vmImage: 'Ubuntu-16.04'
 
@@ -130,7 +77,7 @@ jobs:
             done
 
             if [[ -z "$applications" ]]; then
-              echo "##vso[task.logissue type=error]No application definiton modified"
+              echo "No application definiton modified"
               exit 1
             else
               applications=${applications:1}
@@ -147,12 +94,9 @@ jobs:
 # BuildInfrastructure
 # -----------------------------------------------------------------------------
 - job: BuildInfrastructure
-  displayName: "Build Application infrastructure"
   pool:
     vmImage: 'Ubuntu-16.04'
   dependsOn: IdentifyApplications
-  workspace:
-    clean: all
   strategy:
     matrix: $[ dependencies.IdentifyApplications.outputs['GetMatrixVariables.applications'] ]
 
@@ -213,45 +157,8 @@ jobs:
           workingDirectory: 'tools/ansible'
           script: |
             source ../../ansible-2.9.6/bin/activate
-            ansible-playbook -i localhost,k 00-generate-application-servers.yml -e application=$(application_name) -e application_servers_path='$(Build.ArtifactStagingDirectory)'
+            ansible-playbook -i localhost,k 00-generate-application-servers.yml -e application=$(application_name)
       displayName: 'Execute ansible'
-
-
-    - task: PublishBuildArtifacts@1
-      inputs:
-        pathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        artifactName:  '$(application_name)'
-
-
-# -----------------------------------------------------------------------------
-# Synchronize result
-# -----------------------------------------------------------------------------
-- job: SyncInventory
-  displayName: "Synchronize generated inventories"
-  pool:
-    vmImage: 'Ubuntu-16.04'
-  dependsOn: BuildInfrastructure
-  workspace:
-    clean: all
-  condition:   and(succeeded(),
-                    ne(variables['Build.Reason'], 'PullRequest'),
-                    ne(variables['Build.SourceBranchName'], 'master')
-                  )
-
-  steps:
-
-
-    # Checkout the repository and keep git credential
-    - checkout:           self
-      clean:              true
-      submodules:         true
-      persistCredentials: true
-
-    - task: DownloadBuildArtifacts@0
-      displayName: 'Download Build Artifacts'
-      inputs:
-        downloadPath: 'infrastructure/generated'
-        downloadType: 'all'
 
     - task: Bash@3
       inputs:
@@ -276,53 +183,7 @@ jobs:
             git pull
             git push --set-upstream origin $branch_name
       displayName: 'Commit application server generations'
-
-# -----------------------------------------------------------------------------
-# Tag master build
-# -----------------------------------------------------------------------------
-- job: TagMaster
-  displayName: "Tag Master with new version $(BuildNumber)"
-  pool:
-    vmImage: 'Ubuntu-16.04'
-  dependsOn: BuildInfrastructure
-  workspace:
-    clean: all
-  condition:   and(succeeded(),
-                    eq(variables['Build.Reason'], 'BatchedCI'),
-                    eq(variables['Build.SourceBranchName'], 'master')
-                  )
-
-  steps:
-
-    - task: Bash@3
-      inputs:
-          targetType:       'inline'
-          workingDirectory: '.'
-          script: |
-            echo "$BUILD_BUILDNUMBER"
-
-    # Checkout the repository and keep git credential
-    - checkout:           self
-      clean:              true
-      submodules:         true
-      persistCredentials: true
-
-    - task: Bash@3
-      inputs:
-          targetType:       'inline'
-          workingDirectory: '.'
-          script: |
-            git config --global user.email "you@example.com"
-            git config --global user.name "Your Name"
-            branch_name=$(echo "$BUILD_SOURCEBRANCH" | sed "s/refs\/heads\///")
-            echo "***************************************************************"
-            echo "Current branch : $branch_name"
-            echo "***************************************************************"
-
-            git checkout -b $branch_name
-            git branch --set-upstream-to=origin/$branch_name $branch_name
-
-            git tag $BUILD_BUILDNUMBER
-            git push origin --tags
-
-      displayName: 'Push Tag'
+      condition:   and(succeeded(),
+                        ne(variables['Build.Reason'], 'PullRequest'),
+                        ne(variables['Build.SourceBranchName'], 'master')
+                      )
