@@ -12,6 +12,17 @@ trigger:
     exclude:
     - /**/*.md
 
+pr:
+  autoCancel: true
+  branches:
+    include:
+    - master
+  paths:
+    include:
+    - infrastructure/definitions/*
+    exclude:
+    - /**/*.md
+
 variables:
   runNumber: $[counter(variables['build.reason'], 0)]
 
@@ -130,8 +141,9 @@ jobs:
             done
 
             if [[ -z "$applications" ]]; then
-              echo "##vso[task.logissue type=error]No application definiton modified"
-              exit 1
+              echo "##vso[task.logissue type=warning]No application definiton modified"
+              echo "##vso[task.setvariable variable=skipsubsequent;isOutput=true]true"
+              exit 0
             else
               applications=${applications:1}
               applications={$applications}
@@ -151,6 +163,11 @@ jobs:
   pool:
     vmImage: 'Ubuntu-16.04'
   dependsOn: IdentifyApplications
+  condition: >-
+    and(
+        succeeded(),
+        ne(dependencies.IdentifyApplications.outputs['GetMatrixVariables.skipsubsequent'], 'true')
+       )
   workspace:
     clean: all
   strategy:
