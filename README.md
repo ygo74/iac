@@ -7,6 +7,10 @@ Build status : [![Build Status](https://dev.azure.com/ygo74/iac/_apis/build/stat
 
 ## Application Definitions
 
+Application definition is defined at different levels :
+=> Global Application
+=> Environment
+
 ## Tools
 
 ## Manage Infrastructure version
