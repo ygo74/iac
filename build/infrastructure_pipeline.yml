@@ -79,11 +79,11 @@ jobs:
 
             # Publish build Number with next tag version
             if [[ $branch_name == *"master"* && $BUILD_REASON == *"Manual"* ]]; then
-               $nextVersion="$nextVersion-i$(runNumber)"
+               nextVersion="$nextVersion-i$(runNumber)"
             elif [[ $BUILD_REASON == *"PullRequest"* ]]; then
-               $nextVersion="$nextVersion-p$(runNumber)"
+               nextVersion="$nextVersion-p$(runNumber)"
             elif [[ $branch_name != *"master"* && $BUILD_REASON != *"Manual"* ]]; then
-               $nextVersion="$nextVersion-b$(runNumber)"
+               nextVersion="$nextVersion-b$(runNumber)"
             fi
 
             echo "##vso[build.updatebuildnumber]$nextVersion"
