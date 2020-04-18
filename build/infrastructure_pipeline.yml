@@ -43,6 +43,9 @@ jobs:
           targetType:       'inline'
           workingDirectory: '.'
           script: |
+            branch_name=$(echo "$BUILD_SOURCEBRANCH" | sed "s/refs\/heads\///")
+            echo "Build on $branch_name for reason $BUILD_REASON"
+
             # Retrieve version defined in version.yml
             echo "***************************************************************"
             echo "Read version Major.Minor in version.yml"
@@ -75,11 +78,11 @@ jobs:
             fi
 
             # Publish build Number with next tag version
-            if [[ $BUILD_SOURCEBRANCH == *"master"* && $BUILD_REASON == *"Manual"* ]]; then
+            if [[ $branch_name == *"master"* && $BUILD_REASON == *"Manual"* ]]; then
                $nextVersion="$nextVersion-i$(runNumber)"
             elif [[ $BUILD_REASON == *"PullRequest"* ]]; then
                $nextVersion="$nextVersion-p$(runNumber)"
-            elif [[ $BUILD_SOURCEBRANCH != *"master"* && $BUILD_REASON != *"Manual"* ]]; then
+            elif [[ $branch_name != *"master"* && $BUILD_REASON != *"Manual"* ]]; then
                $nextVersion="$nextVersion-b$(runNumber)"
             fi
 
