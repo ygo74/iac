@@ -77,9 +77,9 @@ jobs:
             # Publish build Number with next tag version
             if [[ $BUILD_SOURCEBRANCH == *"master"* && $BUILD_REASON == *"Manual"* ]]; then
                $nextVersion="$nextVersion-i$(runNumber)"
-            elif [[ $BUILD_REASON == *"PullRequest"* ]]
+            elif [[ $BUILD_REASON == *"PullRequest"* ]]; then
                $nextVersion="$nextVersion-p$(runNumber)"
-            elif [[ $BUILD_SOURCEBRANCH != *"master"* && $BUILD_REASON != *"Manual"* ]]
+            elif [[ $BUILD_SOURCEBRANCH != *"master"* && $BUILD_REASON != *"Manual"* ]]; then
                $nextVersion="$nextVersion-b$(runNumber)"
             fi
 
