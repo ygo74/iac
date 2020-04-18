@@ -83,7 +83,7 @@ jobs:
                $nextVersion="$nextVersion-b$(runNumber)"
             fi
 
-            echo "##vso[build.updatebuildnumber]$nextVersion-r$(runNumber)"
+            echo "##vso[build.updatebuildnumber]$nextVersion"
 
 
 # -----------------------------------------------------------------------------
