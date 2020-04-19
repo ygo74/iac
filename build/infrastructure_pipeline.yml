@@ -23,11 +23,6 @@ pr:
     exclude:
     - /**/*.md
 
-variables:
-  runNumber: $[counter(variables['build.reason'], 0)]
-  minorVersion: "0-"
-  testCounter: $[counter(variables['minorVersion'], 0)]
-
 jobs:
 # -----------------------------------------------------------------------------
 # IdentifyNextVersion
@@ -41,6 +36,7 @@ jobs:
 
     - task: Bash@3
       displayName: 'Identify Next Version'
+      name: CalculateVersion
       inputs:
           targetType:       'inline'
           workingDirectory: '.'
@@ -73,6 +69,7 @@ jobs:
                nextVersion=$(echo $lastTag  | awk -F"." 'BEGIN{OFS=".";} {$NF+=1; print $0}')
             fi
             echo "Next version is : $nextVersion"
+            echo "##vso[task.setvariable variable=nextVersion;isOutput=true]$nextVersion"
 
             if [[ -z "$nextVersion" ]]; then
               echo "##vso[task.logissue type=error]No next version found!!!"
@@ -82,40 +79,60 @@ jobs:
             # Update Minor version counter
             a=( ${nextVersion//./ } )
 
-
             # Publish build Number with next tag version
             if [[ $branch_name == *"master"* && $BUILD_REASON == *"Manual"* ]]; then
-               nextVersion="$nextVersion-i$(runNumber)"
-               echo "##vso[task.setvariable variable=minorVersion;]${a[2]}-i"
+              #  nextVersion="$nextVersion-i$(runNumber)"
+               echo "##vso[task.setvariable variable=minorVersionCounter;isOutput=true]${a[2]}-i"
             elif [[ $BUILD_REASON == *"PullRequest"* ]]; then
-               nextVersion="$nextVersion-p$(runNumber)"
-               echo "##vso[task.setvariable variable=minorVersion;]${a[2]}-p"
+              #  nextVersion="$nextVersion-p$(runNumber)"
+               echo "##vso[task.setvariable variable=minorVersionCounter;isOutput=true]${a[2]}-p"
             elif [[ $branch_name != *"master"* && $BUILD_REASON != *"Manual"* ]]; then
-               nextVersion="$nextVersion-b$(runNumber)"
-               echo "##vso[task.setvariable variable=minorVersion;]${a[2]}-b"
+              #  nextVersion="$nextVersion-b$(runNumber)"
+               echo "##vso[task.setvariable variable=minorVersionCounter;isOutput=true]${a[2]}-b"
             else
-               echo "##vso[task.setvariable variable=minorVersion;]${a[2]}"
+               echo "##vso[task.setvariable variable=minorVersionCounter;isOutput=true]${a[2]}-master"
             fi
 
-            echo "##vso[build.updatebuildnumber]$nextVersion"
+# -----------------------------------------------------------------------------
+# UpdateBuildNumber
+# -----------------------------------------------------------------------------
+- job: UpdateBuildNumber
+  displayName: "UpdateBuildNumber"
+  dependsOn: IdentifyNextVersion
+  pool:
+    vmImage: 'Ubuntu-16.04'
+
+  variables:
+    minorVersionCounter: $[counter(dependencies.IdentifyNextVersion.outputs['CalculateVersion.minorVersionCounter'], 0)]
+    nextVersion: $[ dependencies.IdentifyNextVersion.outputs['CalculateVersion.nextVersion'] ]
+
+  steps:
+
+    # Checkout the repository and keep git credential
+    - checkout:    none
+      displayName: 'Skip Checkout'
 
     - task: Bash@3
-      displayName: 'View counter'
+      displayName: 'Update Build Number'
       inputs:
           targetType:       'inline'
           workingDirectory: '.'
           script: |
-            echo "minorVersion: $MINORVERSION"
-            echo "minorVersion: $(minorVersion)"
-            echo "counter: $TESTCOUNTER"
-            echo "counter: $(testCounter)"
+            # Update Minor version counter
+            a=( ${nextVersion//./ } )
+
+            if [[ $MINORVERSIONCOUNTER == *"${a[2]}-master"* ]]; then
+              echo "##vso[build.updatebuildnumber]$NEXTVERSION"
+            else
+              echo "##vso[build.updatebuildnumber]$NEXTVERSION-$MINORVERSIONCOUNTER"
+            fi
 
 # -----------------------------------------------------------------------------
 # IdentifyApplications
 # -----------------------------------------------------------------------------
 - job: IdentifyApplications
   displayName: "Identify applications'definition updated or created"
-  dependsOn: IdentifyNextVersion
+  dependsOn: UpdateBuildNumber
   pool:
     vmImage: 'Ubuntu-16.04'
 
