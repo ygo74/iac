@@ -83,14 +83,18 @@ jobs:
             if [[ $branch_name == *"master"* && $BUILD_REASON == *"Manual"* ]]; then
               #  nextVersion="$nextVersion-i$(runNumber)"
                echo "##vso[task.setvariable variable=minorVersionCounter;isOutput=true]${a[2]}-i"
+               echo "##vso[task.setvariable variable=buildType;isOutput=true]i"
             elif [[ $BUILD_REASON == *"PullRequest"* ]]; then
               #  nextVersion="$nextVersion-p$(runNumber)"
                echo "##vso[task.setvariable variable=minorVersionCounter;isOutput=true]${a[2]}-p"
+               echo "##vso[task.setvariable variable=buildType;isOutput=true]p"
             elif [[ $branch_name != *"master"* && $BUILD_REASON != *"Manual"* ]]; then
               #  nextVersion="$nextVersion-b$(runNumber)"
                echo "##vso[task.setvariable variable=minorVersionCounter;isOutput=true]${a[2]}-b"
+               echo "##vso[task.setvariable variable=buildType;isOutput=true]b"
             else
                echo "##vso[task.setvariable variable=minorVersionCounter;isOutput=true]${a[2]}-master"
+               echo "##vso[task.setvariable variable=buildType;isOutput=true]master"
             fi
 
 # -----------------------------------------------------------------------------
@@ -104,7 +108,8 @@ jobs:
 
   variables:
     minorVersionCounter: $[counter(dependencies.IdentifyNextVersion.outputs['CalculateVersion.minorVersionCounter'], 0)]
-    nextVersion: $[ dependencies.IdentifyNextVersion.outputs['CalculateVersion.nextVersion'] ]
+    nextVersion:         $[ dependencies.IdentifyNextVersion.outputs['CalculateVersion.nextVersion'] ]
+    buildType:           $[ dependencies.IdentifyNextVersion.outputs['CalculateVersion.buildType'] ]
 
   steps:
 
@@ -118,13 +123,11 @@ jobs:
           targetType:       'inline'
           workingDirectory: '.'
           script: |
-            # Update Minor version counter
-            a=( ${nextVersion//./ } )
 
-            if [[ $MINORVERSIONCOUNTER == *"${a[2]}-master"* ]]; then
+            if [[ $BUILDTYPE == *"master"* ]]; then
               echo "##vso[build.updatebuildnumber]$NEXTVERSION"
             else
-              echo "##vso[build.updatebuildnumber]$NEXTVERSION-$MINORVERSIONCOUNTER"
+              echo "##vso[build.updatebuildnumber]$NEXTVERSION-$BUILDTYPE$MINORVERSIONCOUNTER"
             fi
 
 # -----------------------------------------------------------------------------
