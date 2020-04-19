@@ -312,7 +312,7 @@ jobs:
 # Tag master build
 # -----------------------------------------------------------------------------
 - job: TagMaster
-  displayName: "Tag Master with new version $(Build.BuildNumber)"
+  displayName: "Tag Master with new version"
   pool:
     vmImage: 'Ubuntu-16.04'
   dependsOn: BuildInfrastructure
@@ -356,4 +356,4 @@ jobs:
             git tag $BUILD_BUILDNUMBER
             git push origin --tags
 
-      displayName: 'Push Tag'
+      displayName: 'Push Tag version $(Build.BuildNumber)'
