@@ -24,16 +24,18 @@ pr:
     - /**/*.md
 
 jobs:
+
 # -----------------------------------------------------------------------------
-# IdentifyNextVersion
+# IdentifyBuildContext
 # -----------------------------------------------------------------------------
-- job: IdentifyNextVersion
-  displayName: "Identify Next version from tags"
+- job: IdentifyBuildContext
+  displayName: "Identify Build Context"
   pool:
     vmImage: 'Ubuntu-16.04'
 
   steps:
 
+    # Identify Next Version from latest tag
     - task: Bash@3
       displayName: 'Identify Next Version'
       name: CalculateVersion
@@ -97,54 +99,13 @@ jobs:
                echo "##vso[task.setvariable variable=buildType;isOutput=true]master"
             fi
 
-# -----------------------------------------------------------------------------
-# UpdateBuildNumber
-# -----------------------------------------------------------------------------
-- job: UpdateBuildNumber
-  displayName: "UpdateBuildNumber"
-  dependsOn: IdentifyNextVersion
-  pool:
-    vmImage: 'Ubuntu-16.04'
-
-  variables:
-    minorVersionCounter: $[counter(dependencies.IdentifyNextVersion.outputs['CalculateVersion.minorVersionCounter'], 0)]
-    nextVersion:         $[ dependencies.IdentifyNextVersion.outputs['CalculateVersion.nextVersion'] ]
-    buildType:           $[ dependencies.IdentifyNextVersion.outputs['CalculateVersion.buildType'] ]
-
-  steps:
-
-    # Checkout the repository and keep git credential
-    - checkout:    none
-      displayName: 'Skip Checkout'
-
+    # Identify Applications to build
     - task: Bash@3
-      displayName: 'Update Build Number'
+      name:        'GetMatrixVariables'
+      displayName: 'Init Application Matrix'
       inputs:
           targetType:       'inline'
           workingDirectory: '.'
-          script: |
-
-            if [[ $BUILDTYPE == *"master"* ]]; then
-              echo "##vso[build.updatebuildnumber]$NEXTVERSION"
-            else
-              echo "##vso[build.updatebuildnumber]$NEXTVERSION-$BUILDTYPE$MINORVERSIONCOUNTER"
-            fi
-
-# -----------------------------------------------------------------------------
-# IdentifyApplications
-# -----------------------------------------------------------------------------
-- job: IdentifyApplications
-  displayName: "Identify applications'definition updated or created"
-  dependsOn: UpdateBuildNumber
-  pool:
-    vmImage: 'Ubuntu-16.04'
-
-  steps:
-
-    - task: Bash@3
-      inputs:
-          targetType:       'inline'
-          workingDirectory: 'tools/ansible'
           script: |
             echo "***************************************************************"
             export
@@ -207,8 +168,39 @@ jobs:
             fi
 
             echo "***************************************************************"
-      name:        'GetMatrixVariables'
-      displayName: 'Init Application Matrix'
+
+# -----------------------------------------------------------------------------
+# UpdateBuildNumber
+# -----------------------------------------------------------------------------
+- job: UpdateBuildNumber
+  displayName: "UpdateBuildNumber"
+  dependsOn: IdentifyBuildContext
+  pool:
+    vmImage: 'Ubuntu-16.04'
+
+  variables:
+    minorVersionCounter: $[counter(dependencies.IdentifyBuildContext.outputs['CalculateVersion.minorVersionCounter'], 0)]
+    nextVersion:         $[ dependencies.IdentifyBuildContext.outputs['CalculateVersion.nextVersion'] ]
+    buildType:           $[ dependencies.IdentifyBuildContext.outputs['CalculateVersion.buildType'] ]
+
+  steps:
+
+    # Checkout the repository and keep git credential
+    - checkout:    none
+      displayName: 'Skip Checkout'
+
+    - task: Bash@3
+      displayName: 'Update Build Number'
+      inputs:
+          targetType:       'inline'
+          workingDirectory: '.'
+          script: |
+
+            if [[ $BUILDTYPE == *"master"* ]]; then
+              echo "##vso[build.updatebuildnumber]$NEXTVERSION"
+            else
+              echo "##vso[build.updatebuildnumber]$NEXTVERSION-$BUILDTYPE$MINORVERSIONCOUNTER"
+            fi
 
 # -----------------------------------------------------------------------------
 # BuildInfrastructure
@@ -217,16 +209,16 @@ jobs:
   displayName: "Build Application infrastructure"
   pool:
     vmImage: 'Ubuntu-16.04'
-  dependsOn: IdentifyApplications
+  dependsOn: IdentifyBuildContext
   condition: >-
     and(
         succeeded(),
-        ne(dependencies.IdentifyApplications.outputs['GetMatrixVariables.skipsubsequent'], 'true')
+        ne(dependencies.IdentifyBuildContext.outputs['GetMatrixVariables.skipsubsequent'], 'true')
        )
   workspace:
     clean: all
   strategy:
-    matrix: $[ dependencies.IdentifyApplications.outputs['GetMatrixVariables.applications'] ]
+    matrix: $[ dependencies.IdentifyBuildContext.outputs['GetMatrixVariables.applications'] ]
 
   steps:
 
