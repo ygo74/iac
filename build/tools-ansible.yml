@@ -67,3 +67,37 @@ jobs:
           source ../../ansible-2.9.6/bin/activate
           ansible-lint .
     displayName: 'Ansible lint'
+
+  # Generate application specification
+  - task: Bash@3
+    inputs:
+        targetType: 'inline'
+        workingDirectory: tools/ansible
+        script: |
+          source ../../ansible-2.9.6/bin/activate
+          ansible-playbook -i localhost,k 00-generate-application-servers.yml \
+                 -e application=application_specifications_v2 \
+                 -e application_definition_path=../../specifications/application_specifications_v2.yml \
+                 -e application_servers_path=$(Build.ArtifactStagingDirectory)
+    displayName: 'Generate application specification'
+
+
+  # Test application generated from specification
+  - task: Bash@3
+    inputs:
+        targetType: 'inline'
+        workingDirectory: tools/ansible/tests
+        script: |
+          source ../../ansible-2.9.6/bin/activate
+          ansible-playbook -i $(Build.ArtifactStagingDirectory)/dev 00-validate_iac_output.yml
+    displayName: 'Validate generated application from specification'
+    env:
+      JUNIT_OUTPUT_DIR: $(System.DefaultWorkingDirectory)/tests
+      JUNIT_TASK_CLASS: True
+      JUNIT_TASK_RELATIVE_PATH: True
+
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: JUnit
+      testResultsFiles: '$(System.DefaultWorkingDirectory)/tests/**/*.xml'
+      failTaskOnFailedTests: true
