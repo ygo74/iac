@@ -25,6 +25,8 @@ pr:
 
 variables:
   runNumber: $[counter(variables['build.reason'], 0)]
+  minorVersion: "0-"
+  testCounter: $[counter(variables['minorVersion'], 0)]
 
 jobs:
 # -----------------------------------------------------------------------------
@@ -77,17 +79,36 @@ jobs:
               exit 1
             fi
 
+            # Update Minor version counter
+            a=( ${nextVersion//./ } )
+
+
             # Publish build Number with next tag version
             if [[ $branch_name == *"master"* && $BUILD_REASON == *"Manual"* ]]; then
                nextVersion="$nextVersion-i$(runNumber)"
+               echo "##vso[task.setvariable variable=minorVersion;]${a[2]}-i"
             elif [[ $BUILD_REASON == *"PullRequest"* ]]; then
                nextVersion="$nextVersion-p$(runNumber)"
+               echo "##vso[task.setvariable variable=minorVersion;]${a[2]}-p"
             elif [[ $branch_name != *"master"* && $BUILD_REASON != *"Manual"* ]]; then
                nextVersion="$nextVersion-b$(runNumber)"
+               echo "##vso[task.setvariable variable=minorVersion;]${a[2]}-b"
+            else
+               echo "##vso[task.setvariable variable=minorVersion;]${a[2]}"
             fi
 
             echo "##vso[build.updatebuildnumber]$nextVersion"
 
+    - task: Bash@3
+      displayName: 'View counter'
+      inputs:
+          targetType:       'inline'
+          workingDirectory: '.'
+          script: |
+            echo "minorVersion: $MINORVERSION"
+            echo "minorVersion: $(minorVersion)"
+            echo "counter: $TESTCOUNTER"
+            echo "counter: $(testCounter)"
 
 # -----------------------------------------------------------------------------
 # IdentifyApplications
