@@ -5,7 +5,6 @@
 |--------------|--------------------------------------------------------------------------------------------------------------------|
 | License      | [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/ygo74/iac_tools/blob/master/LICENSE) |
 | Build status | [![Build Status](https://dev.azure.com/ygo74/iac/_apis/build/status/ygo74.iac?branchName=master)](https://dev.azure.com/ygo74/iac/_build/latest?definitionId=21&branchName=master) |
-| Test status  | [![Tests Status](https://img.shields.io/azure-devops/tests/ygo74/iac/24)](https://img.shields.io/azure-devops/tests/ygo74/iac/24) |
 
 
 ## Project structure
